@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace WebApi.Controllers;
 
-public class StoryController : ControllerBase
+public class StoryController : BaseController
 {
     private readonly IStoryService _storyService;
 
