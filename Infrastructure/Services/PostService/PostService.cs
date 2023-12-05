@@ -25,7 +25,7 @@ public class PostService(DataContext context, IMapper mapper, IFileService fileS
         {
             var posts = context.Posts.AsQueryable();
             if (filter.UserId != null)
-                posts = posts.Where(p => p.UserId == filter.UserId);
+                posts = posts.Where(p => p.ApplicationUserId == filter.UserId);
             if (!string.IsNullOrEmpty(filter.Content))
                 posts = posts.Where(p => p.Content!.ToLower().Contains(filter.Content.ToLower()));
             if (!string.IsNullOrEmpty(filter.Title))
@@ -34,52 +34,56 @@ public class PostService(DataContext context, IMapper mapper, IFileService fileS
                     select new GetPostDto()
                     {
                         PostId = p.PostId,
-                        UserId = p.UserId,
+                        UserId = p.ApplicationUserId,
                         Title = p.Title,
                         Content = p.Content,
                         DatePublished = p.DatePublished,
                         Images = p.Images.Select(i => i.ImageName).ToList(),
-                        PostLike = p.PostLike.PostUserLikes.Any(l => l.UserId == userId && l.PostLikeId == p.PostId),
+                        PostLike = p.PostLike.PostUserLikes.Any(l =>
+                            l.ApplicationUserId == userId && l.PostLikeId == p.PostId),
                         PostLikeCount = p.PostLike.LikeCount,
-                        UserLikes = p.UserId == userId
+                        UserLikes = p.ApplicationUserId == userId
                             ? p.PostLike.PostUserLikes.Select(u => new GetUserShortInfoDto()
                             {
-                                UserId = u.UserId,
-                                UserName = u.User.UserName,
-                                Fullname = string.Concat(u.User.UserProfile.FirstName + " " +
-                                                         u.User.UserProfile.LastName),
-                                UserPhoto = u.User.UserProfile.Image
+                                UserId = u.ApplicationUserId,
+                                UserName = u.ApplicationUser.UserName,
+                                Fullname = u.ApplicationUser.UserProfile.FullName,
+                                UserPhoto = u.ApplicationUser.UserProfile.Image,
+                                Subscriptions = context.FollowingRelationShips.AsNoTracking().Any(x =>
+                                    x.ApplicationUserId == userId && x.FollowingId == u.ApplicationUserId)
                             }).ToList()
                             : null,
                         PostView = p.PostView.ViewCount,
-                        UserViews = p.UserId == userId
+                        UserViews = p.ApplicationUserId == userId
                             ? p.PostView.PostViewUsers.Select(u => new GetUserShortInfoDto()
                             {
-                                UserId = u.UserId,
-                                UserName = u.User.UserName,
-                                Fullname = string.Concat(u.User.UserProfile.FirstName + " " +
-                                                         u.User.UserProfile.LastName),
-                                UserPhoto = u.User.UserProfile.Image
+                                UserId = u.ApplicationUserId,
+                                UserName = u.ApplicationUser.UserName,
+                                Fullname = u.ApplicationUser.UserProfile.FullName,
+                                UserPhoto = u.ApplicationUser.UserProfile.Image,
+                                Subscriptions = context.FollowingRelationShips.AsNoTracking().Any(x =>
+                                    x.ApplicationUserId == userId && x.FollowingId == u.ApplicationUserId)
                             }).ToList()
                             : null,
                         CommentCount = p.PostComments.Count(),
                         PostFavorite =
                             p.PostFavorite.PostFavoriteUsers.Any(
-                                l => l.UserId == userId && l.PostFavoriteId == p.PostId),
-                        UserFavorite = p.UserId == userId
+                                l => l.ApplicationUserId == userId && l.PostFavoriteId == p.PostId),
+                        UserFavorite = p.ApplicationUserId == userId
                             ? p.PostFavorite.PostFavoriteUsers.Select(u => new GetUserShortInfoDto()
                             {
-                                UserId = u.UserId,
-                                UserName = u.User.UserName,
-                                Fullname = string.Concat(u.User.UserProfile.FirstName + " " +
-                                                         u.User.UserProfile.LastName),
-                                UserPhoto = u.User.UserProfile.Image
+                                UserId = u.ApplicationUserId,
+                                UserName = u.ApplicationUser.UserName,
+                                Fullname = u.ApplicationUser.UserProfile.FullName,
+                                UserPhoto = u.ApplicationUser.UserProfile.Image,
+                                Subscriptions = context.FollowingRelationShips.AsNoTracking().Any(x =>
+                                    x.ApplicationUserId == userId && x.FollowingId == u.ApplicationUserId)
                             }).ToList()
                             : null,
                         Comments = p.PostComments.Select(s => new GetPostCommentDto()
                         {
                             PostCommentId = s.PostCommentId,
-                            UserId = s.UserId,
+                            UserId = s.ApplicationUserId,
                             Comment = s.Comment,
                             DateCommented = s.DateCommented
                         }).OrderByDescending(c => c.DateCommented).ToList(),
@@ -111,7 +115,7 @@ public class PostService(DataContext context, IMapper mapper, IFileService fileS
                     select new GetReelsDto()
                     {
                         PostId = p.PostId,
-                        UserId = p.UserId,
+                        UserId = p.ApplicationUserId,
                         Title = p.Title,
                         Content = p.Content,
                         DatePublished = p.DatePublished,
@@ -120,47 +124,51 @@ public class PostService(DataContext context, IMapper mapper, IFileService fileS
                             x.ImageName.ToLower().Contains(".avi") ||
                             x.ImageName.ToLower().Contains(".mpg") ||
                             x.ImageName.ToLower().Contains(".3gp")).Select(i => i.ImageName).FirstOrDefault(),
-                        PostLike = p.PostLike.PostUserLikes.Any(l => l.UserId == userId && l.PostLikeId == p.PostId),
+                        PostLike = p.PostLike.PostUserLikes.Any(l =>
+                            l.ApplicationUserId == userId && l.PostLikeId == p.PostId),
                         PostLikeCount = p.PostLike.LikeCount,
-                        UserLikes = p.UserId == userId
+                        UserLikes = p.ApplicationUserId == userId
                             ? p.PostLike.PostUserLikes.Select(u => new GetUserShortInfoDto()
                             {
-                                UserId = u.UserId,
-                                UserName = u.User.UserName,
-                                Fullname = string.Concat(u.User.UserProfile.FirstName + " " +
-                                                         u.User.UserProfile.LastName),
-                                UserPhoto = u.User.UserProfile.Image
+                                UserId = u.ApplicationUserId,
+                                UserName = u.ApplicationUser.UserName,
+                                Fullname = u.ApplicationUser.UserProfile.FullName,
+                                UserPhoto = u.ApplicationUser.UserProfile.Image,
+                                Subscriptions = context.FollowingRelationShips.AsNoTracking().Any(x =>
+                                    x.ApplicationUserId == userId && x.FollowingId == u.ApplicationUserId)
                             }).ToList()
                             : null,
                         PostView = p.PostView.ViewCount,
-                        UserViews = p.UserId == userId
+                        UserViews = p.ApplicationUserId == userId
                             ? p.PostView.PostViewUsers.Select(u => new GetUserShortInfoDto()
                             {
-                                UserId = u.UserId,
-                                UserName = u.User.UserName,
-                                Fullname = string.Concat(u.User.UserProfile.FirstName + " " +
-                                                         u.User.UserProfile.LastName),
-                                UserPhoto = u.User.UserProfile.Image
+                                UserId = u.ApplicationUserId,
+                                UserName = u.ApplicationUser.UserName,
+                                Fullname = u.ApplicationUser.UserProfile.FullName,
+                                UserPhoto = u.ApplicationUser.UserProfile.Image,
+                                Subscriptions = context.FollowingRelationShips.AsNoTracking().Any(x =>
+                                    x.ApplicationUserId == userId && x.FollowingId == u.ApplicationUserId)
                             }).ToList()
                             : null,
                         CommentCount = p.PostComments.Count(),
                         PostFavorite =
                             p.PostFavorite.PostFavoriteUsers.Any(
-                                l => l.UserId == userId && l.PostFavoriteId == p.PostId),
-                        UserFavorite = p.UserId == userId
+                                l => l.ApplicationUserId == userId && l.PostFavoriteId == p.PostId),
+                        UserFavorite = p.ApplicationUserId == userId
                             ? p.PostFavorite.PostFavoriteUsers.Select(u => new GetUserShortInfoDto()
                             {
-                                UserId = u.UserId,
-                                UserName = u.User.UserName,
-                                Fullname = string.Concat(u.User.UserProfile.FirstName + " " +
-                                                         u.User.UserProfile.LastName),
-                                UserPhoto = u.User.UserProfile.Image
+                                UserId = u.ApplicationUserId,
+                                UserName = u.ApplicationUser.UserName,
+                                Fullname = u.ApplicationUser.UserProfile.FullName,
+                                UserPhoto = u.ApplicationUser.UserProfile.Image,
+                                Subscriptions = context.FollowingRelationShips.AsNoTracking().Any(x =>
+                                    x.ApplicationUserId == userId && x.FollowingId == u.ApplicationUserId)
                             }).ToList()
                             : null,
                         Comments = p.PostComments.Select(s => new GetPostCommentDto()
                         {
                             PostCommentId = s.PostCommentId,
-                            UserId = s.UserId,
+                            UserId = s.ApplicationUserId,
                             Comment = s.Comment,
                             DateCommented = s.DateCommented
                         }).OrderByDescending(c => c.DateCommented).ToList()
@@ -185,48 +193,56 @@ public class PostService(DataContext context, IMapper mapper, IFileService fileS
                 select new GetPostDto()
                 {
                     PostId = p.PostId,
-                    UserId = p.UserId,
+                    UserId = p.ApplicationUserId,
                     Title = p.Title,
                     Content = p.Content,
                     DatePublished = p.DatePublished,
                     Images = p.Images.Select(i => i.ImageName).ToList(),
-                    PostLike = p.PostLike.PostUserLikes.Any(l => l.UserId == userId && l.PostLikeId == p.PostId),
+                    PostLike = p.PostLike.PostUserLikes.Any(l =>
+                        l.ApplicationUserId == userId && l.PostLikeId == p.PostId),
                     PostLikeCount = p.PostLike.LikeCount,
-                    UserLikes = p.UserId == userId
+                    UserLikes = p.ApplicationUserId == userId
                         ? p.PostLike.PostUserLikes.Select(u => new GetUserShortInfoDto()
                         {
-                            UserId = u.UserId,
-                            UserName = u.User.UserName,
-                            Fullname = string.Concat(u.User.UserProfile.FirstName + " " + u.User.UserProfile.LastName),
-                            UserPhoto = u.User.UserProfile.Image
+                            UserId = u.ApplicationUserId,
+                            UserName = u.ApplicationUser.UserName,
+                            Fullname = u.ApplicationUser.UserProfile.FullName,
+                            UserPhoto = u.ApplicationUser.UserProfile.Image,
+                            Subscriptions = context.FollowingRelationShips.AsNoTracking().Any(x =>
+                                x.ApplicationUserId == userId && x.FollowingId == u.ApplicationUserId)
                         }).ToList()
                         : null,
                     PostView = p.PostView.ViewCount,
-                    UserViews = p.UserId == userId
+                    UserViews = p.ApplicationUserId == userId
                         ? p.PostView.PostViewUsers.Select(u => new GetUserShortInfoDto()
                         {
-                            UserId = u.UserId,
-                            UserName = u.User.UserName,
-                            Fullname = string.Concat(u.User.UserProfile.FirstName + " " + u.User.UserProfile.LastName),
-                            UserPhoto = u.User.UserProfile.Image
+                            UserId = u.ApplicationUserId,
+                            UserName = u.ApplicationUser.UserName,
+                            Fullname = u.ApplicationUser.UserProfile.FullName,
+                            UserPhoto = u.ApplicationUser.UserProfile.Image,
+                            Subscriptions = context.FollowingRelationShips.AsNoTracking().Any(x =>
+                                x.ApplicationUserId == userId && x.FollowingId == u.ApplicationUserId)
                         }).ToList()
                         : null,
                     CommentCount = p.PostComments.Count(),
                     PostFavorite =
-                        p.PostFavorite.PostFavoriteUsers.Any(l => l.UserId == userId && l.PostFavoriteId == p.PostId),
-                    UserFavorite = p.UserId == userId
+                        p.PostFavorite.PostFavoriteUsers.Any(l =>
+                            l.ApplicationUserId == userId && l.PostFavoriteId == p.PostId),
+                    UserFavorite = p.ApplicationUserId == userId
                         ? p.PostFavorite.PostFavoriteUsers.Select(u => new GetUserShortInfoDto()
                         {
-                            UserId = u.UserId,
-                            UserName = u.User.UserName,
-                            Fullname = string.Concat(u.User.UserProfile.FirstName + " " + u.User.UserProfile.LastName),
-                            UserPhoto = u.User.UserProfile.Image
+                            UserId = u.ApplicationUserId,
+                            UserName = u.ApplicationUser.UserName,
+                            Fullname = u.ApplicationUser.UserProfile.FullName,
+                            UserPhoto = u.ApplicationUser.UserProfile.Image,
+                            Subscriptions = context.FollowingRelationShips.AsNoTracking().Any(x =>
+                                x.ApplicationUserId == userId && x.FollowingId == u.ApplicationUserId)
                         }).ToList()
                         : null,
                     Comments = p.PostComments.Select(s => new GetPostCommentDto()
                     {
                         PostCommentId = s.PostCommentId,
-                        UserId = s.UserId,
+                        UserId = s.ApplicationUserId,
                         Comment = s.Comment,
                         DateCommented = s.DateCommented
                     }).OrderByDescending(c => c.DateCommented).ToList(),
@@ -244,53 +260,61 @@ public class PostService(DataContext context, IMapper mapper, IFileService fileS
         try
         {
             var posts = await (from p in context.Posts
-                join f in context.FollowingRelationShips on p.UserId equals f.FollowingId
-                where f.UserId == filter.UserId
+                join f in context.FollowingRelationShips on p.ApplicationUserId equals f.FollowingId
+                where f.ApplicationUserId == filter.UserId
                 select new GetPostDto()
                 {
                     PostId = p.PostId,
-                    UserId = p.UserId,
+                    UserId = p.ApplicationUserId,
                     Title = p.Title,
                     Content = p.Content,
                     DatePublished = p.DatePublished,
                     Images = p.Images.Select(i => i.ImageName).ToList(),
-                    PostLike = p.PostLike.PostUserLikes.Any(l => l.UserId == userId && l.PostLikeId == p.PostId),
+                    PostLike = p.PostLike.PostUserLikes.Any(l =>
+                        l.ApplicationUserId == userId && l.PostLikeId == p.PostId),
                     PostLikeCount = p.PostLike.LikeCount,
-                    UserLikes = p.UserId == userId
+                    UserLikes = p.ApplicationUserId == userId
                         ? p.PostLike.PostUserLikes.Select(u => new GetUserShortInfoDto()
                         {
-                            UserId = u.UserId,
-                            UserName = u.User.UserName,
-                            Fullname = string.Concat(u.User.UserProfile.FirstName + " " + u.User.UserProfile.LastName),
-                            UserPhoto = u.User.UserProfile.Image
+                            UserId = u.ApplicationUserId,
+                            UserName = u.ApplicationUser.UserName,
+                            Fullname = u.ApplicationUser.UserProfile.FullName,
+                            UserPhoto = u.ApplicationUser.UserProfile.Image,
+                            Subscriptions = context.FollowingRelationShips.AsNoTracking().Any(x =>
+                                x.ApplicationUserId == userId && x.FollowingId == u.ApplicationUserId)
                         }).ToList()
                         : null,
                     PostView = p.PostView.ViewCount,
-                    UserViews = p.UserId == userId
+                    UserViews = p.ApplicationUserId == userId
                         ? p.PostView.PostViewUsers.Select(u => new GetUserShortInfoDto()
                         {
-                            UserId = u.UserId,
-                            UserName = u.User.UserName,
-                            Fullname = string.Concat(u.User.UserProfile.FirstName + " " + u.User.UserProfile.LastName),
-                            UserPhoto = u.User.UserProfile.Image
+                            UserId = u.ApplicationUserId,
+                            UserName = u.ApplicationUser.UserName,
+                            Fullname = u.ApplicationUser.UserProfile.FullName,
+                            UserPhoto = u.ApplicationUser.UserProfile.Image,
+                            Subscriptions = context.FollowingRelationShips.AsNoTracking().Any(x =>
+                                x.ApplicationUserId == userId && x.FollowingId == u.ApplicationUserId)
                         }).ToList()
                         : null,
                     CommentCount = p.PostComments.Count(),
                     PostFavorite =
-                        p.PostFavorite.PostFavoriteUsers.Any(l => l.UserId == userId && l.PostFavoriteId == p.PostId),
-                    UserFavorite = p.UserId == userId
+                        p.PostFavorite.PostFavoriteUsers.Any(l =>
+                            l.ApplicationUserId == userId && l.PostFavoriteId == p.PostId),
+                    UserFavorite = p.ApplicationUserId == userId
                         ? p.PostFavorite.PostFavoriteUsers.Select(u => new GetUserShortInfoDto()
                         {
-                            UserId = u.UserId,
-                            UserName = u.User.UserName,
-                            Fullname = string.Concat(u.User.UserProfile.FirstName + " " + u.User.UserProfile.LastName),
-                            UserPhoto = u.User.UserProfile.Image
+                            UserId = u.ApplicationUserId,
+                            UserName = u.ApplicationUser.UserName,
+                            Fullname = u.ApplicationUser.UserProfile.FullName,
+                            UserPhoto = u.ApplicationUser.UserProfile.Image,
+                            Subscriptions = context.FollowingRelationShips.AsNoTracking().Any(x =>
+                                x.ApplicationUserId == userId && x.FollowingId == u.ApplicationUserId)
                         }).ToList()
                         : null,
                     Comments = p.PostComments.Select(s => new GetPostCommentDto()
                     {
                         PostCommentId = s.PostCommentId,
-                        UserId = s.UserId,
+                        UserId = s.ApplicationUserId,
                         Comment = s.Comment,
                         DateCommented = s.DateCommented
                     }).OrderByDescending(c => c.DateCommented).ToList(),
@@ -309,7 +333,7 @@ public class PostService(DataContext context, IMapper mapper, IFileService fileS
         try
         {
             var post = mapper.Map<Post>(addPost);
-            post.UserId = userId;
+            post.ApplicationUserId = userId;
             await context.Posts.AddAsync(post);
             await context.SaveChangesAsync();
             var postLike = new PostLike()
@@ -377,12 +401,13 @@ public class PostService(DataContext context, IMapper mapper, IFileService fileS
             if (stats == null) return new Response<bool>(HttpStatusCode.BadRequest, "Post not found");
 
             var existingStatUser =
-                context.PostUserLikes.FirstOrDefault(st => st.UserId == userId && st.PostLikeId == stats.PostId);
+                context.PostUserLikes.FirstOrDefault(st =>
+                    st.ApplicationUserId == userId && st.PostLikeId == stats.PostId);
             if (existingStatUser == null)
             {
                 var newPostUserLike = new PostUserLike()
                 {
-                    UserId = userId,
+                    ApplicationUserId = userId,
                     PostLikeId = stats.PostId
                 };
                 await context.PostUserLikes.AddAsync(newPostUserLike);
@@ -407,14 +432,15 @@ public class PostService(DataContext context, IMapper mapper, IFileService fileS
         try
         {
             var postViewUser =
-                await context.PostViewUsers.FirstOrDefaultAsync(p => p.UserId == userId && p.PostViewId == postId);
+                await context.PostViewUsers.FirstOrDefaultAsync(p =>
+                    p.ApplicationUserId == userId && p.PostViewId == postId);
             if (postViewUser != null) return new Response<bool>(true);
 
             var post = await context.PostViews.FindAsync(postId);
             post!.ViewCount++;
             var postView = new PostViewUser()
             {
-                UserId = userId,
+                ApplicationUserId = userId,
                 PostViewId = postId
             };
             await context.PostViewUsers.AddAsync(postView);
@@ -468,7 +494,7 @@ public class PostService(DataContext context, IMapper mapper, IFileService fileS
             if (post == null)
                 return new Response<bool>(HttpStatusCode.BadRequest, "Post not found");
             var comment = mapper.Map<PostComment>(addPostComment);
-            comment.UserId = userId;
+            comment.ApplicationUserId = userId;
             await context.PostComments.AddAsync(comment);
             await context.SaveChangesAsync();
             var postCommentLike = new PostCommentLike() { PostCommentId = comment.PostCommentId };
@@ -507,52 +533,50 @@ public class PostService(DataContext context, IMapper mapper, IFileService fileS
                     select new GetPostDto()
                     {
                         PostId = p.PostId,
-                        UserId = p.UserId,
+                        UserId = p.ApplicationUserId,
                         Title = p.Title,
                         Content = p.Content,
                         DatePublished = p.DatePublished,
                         Images = p.Images.Select(i => i.ImageName).ToList(),
-                        PostLike = p.PostLike.PostUserLikes.Any(l => l.UserId == userId && l.PostLikeId == p.PostId),
+                        PostLike = p.PostLike.PostUserLikes.Any(l =>
+                            l.ApplicationUserId == userId && l.PostLikeId == p.PostId),
                         PostLikeCount = p.PostLike.LikeCount,
-                        UserLikes = p.UserId == userId
+                        UserLikes = p.ApplicationUserId == userId
                             ? p.PostLike.PostUserLikes.Select(u => new GetUserShortInfoDto()
                             {
-                                UserId = u.UserId,
-                                UserName = u.User.UserName,
-                                Fullname = string.Concat(u.User.UserProfile.FirstName + " " +
-                                                         u.User.UserProfile.LastName),
-                                UserPhoto = u.User.UserProfile.Image
+                                UserId = u.ApplicationUserId,
+                                UserName = u.ApplicationUser.UserName,
+                                Fullname = u.ApplicationUser.UserProfile.FullName,
+                                UserPhoto = u.ApplicationUser.UserProfile.Image
                             }).ToList()
                             : null,
                         PostView = p.PostView.ViewCount,
-                        UserViews = p.UserId == userId
+                        UserViews = p.ApplicationUserId == userId
                             ? p.PostView.PostViewUsers.Select(u => new GetUserShortInfoDto()
                             {
-                                UserId = u.UserId,
-                                UserName = u.User.UserName,
-                                Fullname = string.Concat(u.User.UserProfile.FirstName + " " +
-                                                         u.User.UserProfile.LastName),
-                                UserPhoto = u.User.UserProfile.Image
+                                UserId = u.ApplicationUserId,
+                                UserName = u.ApplicationUser.UserName,
+                                Fullname = u.ApplicationUser.UserProfile.FullName,
+                                UserPhoto = u.ApplicationUser.UserProfile.Image
                             }).ToList()
                             : null,
                         CommentCount = p.PostComments.Count(),
                         PostFavorite =
                             p.PostFavorite.PostFavoriteUsers.Any(
-                                l => l.UserId == userId && l.PostFavoriteId == p.PostId),
-                        UserFavorite = p.UserId == userId
+                                l => l.ApplicationUserId == userId && l.PostFavoriteId == p.PostId),
+                        UserFavorite = p.ApplicationUserId == userId
                             ? p.PostFavorite.PostFavoriteUsers.Select(u => new GetUserShortInfoDto()
                             {
-                                UserId = u.UserId,
-                                UserName = u.User.UserName,
-                                Fullname = string.Concat(u.User.UserProfile.FirstName + " " +
-                                                         u.User.UserProfile.LastName),
-                                UserPhoto = u.User.UserProfile.Image
+                                UserId = u.ApplicationUserId,
+                                UserName = u.ApplicationUser.UserName,
+                                Fullname = u.ApplicationUser.UserProfile.FullName,
+                                UserPhoto = u.ApplicationUser.UserProfile.Image
                             }).ToList()
                             : null,
                         Comments = p.PostComments.Select(s => new GetPostCommentDto()
                         {
                             PostCommentId = s.PostCommentId,
-                            UserId = s.UserId,
+                            UserId = s.ApplicationUserId,
                             Comment = s.Comment,
                             DateCommented = s.DateCommented
                         }).OrderByDescending(c => c.DateCommented).ToList(),
@@ -577,12 +601,13 @@ public class PostService(DataContext context, IMapper mapper, IFileService fileS
         if (favorite == null) return new Response<bool>(HttpStatusCode.BadRequest, "Post not found");
 
         var existingFavoriteUser =
-            context.PostFavoriteUsers.FirstOrDefault(st => st.UserId == userId && st.PostFavoriteId == favorite.PostId);
+            context.PostFavoriteUsers.FirstOrDefault(st =>
+                st.ApplicationUserId == userId && st.PostFavoriteId == favorite.PostId);
         if (existingFavoriteUser == null)
         {
             var newPostFavorite = new PostFavoriteUser()
             {
-                UserId = userId,
+                ApplicationUserId = userId,
                 PostFavoriteId = favorite.PostId
             };
             await context.PostFavoriteUsers.AddAsync(newPostFavorite);

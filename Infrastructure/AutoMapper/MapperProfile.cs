@@ -2,16 +2,13 @@
 using Domain.Dtos.CategoryDto;
 using Domain.Dtos.ExternalAccountDto;
 using Domain.Dtos.FollowingRelationshipDto;
-using Domain.Dtos.LocationDto;
 using Domain.Dtos.PostCategoryDto;
 using Domain.Dtos.PostCommentDto;
 using Domain.Dtos.PostDto;
 using Domain.Dtos.PostFavoriteDto;
 using Domain.Dtos.PostStatDto;
-using Domain.Dtos.PostTagDto;
 using Domain.Dtos.StoryDtos;
 using Domain.Dtos.StoryViewDtos;
-using Domain.Dtos.TagDto;
 using Domain.Dtos.UserDto;
 using Domain.Dtos.UserProfileDto;
 using Domain.Dtos.UserSettingDto;
@@ -38,9 +35,6 @@ public class MapperProfile : Profile
         CreateMap<AddFollowingRelationShipDto, FollowingRelationShip>()
             .ForMember(dest => dest.DateFollowed, opt => opt.MapFrom(src => DateTime.UtcNow));
 
-        CreateMap<Location, GetLocationDto>();
-        CreateMap<AddLocationDto, Location>();
-
         CreateMap<PostComment, GetPostCommentDto>();
         CreateMap<AddPostCommentDto, PostComment>()
             .ForMember(dest => dest.DateCommented, opt => opt.MapFrom(src => DateTime.UtcNow));
@@ -56,16 +50,13 @@ public class MapperProfile : Profile
 
         CreateMap<PostLike, PostStatDto>().ReverseMap();
 
-        CreateMap<User, GetUserDto>();
-        CreateMap<AddUserDto, User>()
-            .ForMember(dest => dest.DateRegistred, opt => opt.MapFrom(src => DateTime.UtcNow));
+        CreateMap<ApplicationUser, GetUserDto>();
+        CreateMap<AddUserDto, ApplicationUser>()
+            .ForMember(dest => dest.DateRegistered, opt => opt.MapFrom(src => DateTime.UtcNow));
 
         CreateMap<UserProfile, GetUserProfileDto>()
-            .ForMember(dest => dest.Dob, opt => opt.MapFrom(src => src.Dob.ToShortDateString()))
             .ForMember(dest => dest.Image, opt => opt.MapFrom(src => src.Image));
         CreateMap<AddUserProfileDto, UserProfile>()
-            .ForMember(dest => dest.Dob, opt => opt.MapFrom(src => src.Dob.ToShortDateString()))
-            .ForMember(dest => dest.Image, opt => opt.MapFrom(src => src.Image.FileName))
             .ForMember(dest => dest.DateUpdated, opt => opt.MapFrom(src => DateTime.UtcNow));
 
         CreateMap<UserSetting, UserSettingDto>().ReverseMap();

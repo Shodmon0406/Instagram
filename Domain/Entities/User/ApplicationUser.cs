@@ -1,14 +1,13 @@
-﻿using System.ComponentModel.DataAnnotations;
-using Domain.Entities.Post;
+﻿using Domain.Entities.Post;
 using Domain.Enums;
 using Microsoft.AspNetCore.Identity;
 
 
 namespace Domain.Entities.User;
 
-public class User : IdentityUser
+public class ApplicationUser : IdentityUser
 {
-    public DateTime DateRegistred { get; set; }
+    public DateTime DateRegistered { get; set; }
     public UserType UserType { get; set; }
     public UserSetting UserSetting { get; set; } = null!;
     public UserProfile UserProfile { get; set; } = null!;
@@ -21,4 +20,5 @@ public class User : IdentityUser
     public List<PostFavorite> PostFavorites { get; set; } = null!;
     public List<PostUserLike> PostUserLikes { get; set; } = null!;
     public List<ListOfUserCommentLike> ListOfUserCommentLikes { get; set; } = null!;
+    public List<UserSearchHistory> UserSearchHistories { get; set; } = null!;
 }

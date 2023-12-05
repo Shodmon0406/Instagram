@@ -1,12 +1,11 @@
-﻿using Domain.Entities;
-using Domain.Entities.User;
+﻿using Domain.Entities.User;
 using Domain.Enums;
 using Infrastructure.Data;
 using Microsoft.AspNetCore.Identity;
 
 namespace Infrastructure.Seed;
 
-public class Seeder(DataContext context, UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager)
+public class Seeder(DataContext context, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
 {
     public async Task SeedRole()
     {
@@ -25,47 +24,28 @@ public class Seeder(DataContext context, UserManager<IdentityUser> userManager, 
             }
         }
     }
-    
-    public async Task SeedLocation()
-    {
-        var locations = await context.Locations.FindAsync(1);
-        if (locations != null) return;
-        var location = new Location()
-        {
-            LocationId = 1,
-            City = "",
-            Country = "",
-            State = "",
-            ZipCode = ""
-        };
-        await context.Locations.AddAsync(location);
-        await context.SaveChangesAsync();
-    }
 
     public async Task SeedUser()
     {
         var existing = await userManager.FindByNameAsync("admin");
         if (existing != null) return;
-        var identity = new User()
+        var identity = new ApplicationUser()
         {
             UserName = "admin",
             PhoneNumber = "+992005442641",
             Email = "admin@gmail.com",
-            DateRegistred = DateTime.UtcNow,
+            DateRegistered = DateTime.UtcNow,
         };
         await userManager.CreateAsync(identity, "hello123");
         await userManager.AddToRoleAsync(identity, Roles.Admin);
 
         var profileAdmin = new UserProfile()
         {
-            UserId = identity.Id,
-            FirstName = "Shodmon",
-            LastName = "Inoyatzoda",
-            Occupation = string.Empty,
+            ApplicationUserId = identity.Id,
+            FullName = "Shodmon Inoyatzoda",
             DateUpdated = DateTime.UtcNow,
-            LocationId = 1,
             Dob = DateTime.UtcNow,
-            Image = string.Empty,
+            Image = "Huawei.jpeg",
             About = string.Empty,
             Gender = Gender.Male,
         };
@@ -74,8 +54,8 @@ public class Seeder(DataContext context, UserManager<IdentityUser> userManager, 
     }
 }
 
-public class Roles
+public abstract class Roles
 {
     public const string Admin = "Admin";
-    public const string User = "User";
+    public const string User = "ApplicationUser";
 }

@@ -7,7 +7,7 @@ public class PostFavorite
 {
     [Key]
     public int PostId { get; set; }
-    public Post Post { get; set; }
+    public Post Post { get; set; } = null!;
     public int FavoriteCount { get; set; }
-    public List<PostFavoriteUser> PostFavoriteUsers { get; set; }
+    public List<PostFavoriteUser> PostFavoriteUsers { get; set; } = null!;
 }

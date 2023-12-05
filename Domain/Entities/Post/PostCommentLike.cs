@@ -8,5 +8,5 @@ public class PostCommentLike
     [Key]
     public int PostCommentId { get; set; }
     public int LikeCount { get; set; }
-    public PostComment PostComment { get; set; }
+    public PostComment PostComment { get; set; } = null!;
 }

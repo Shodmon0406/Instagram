@@ -22,7 +22,7 @@ public class UserProfileController(IUserProfileService userProfileService,
    
     
     [HttpPut("update-user-profile")]
-    public async Task<IActionResult> UpdateUserProfile([FromForm]UpdateUserProfileDto userProfile)
+    public async Task<IActionResult> UpdateUserProfile([FromBody]UpdateUserProfileDto userProfile)
     {
         if (ModelState.IsValid)
         {
@@ -34,6 +34,28 @@ public class UserProfileController(IUserProfileService userProfileService,
         var response = new Response<UserProfileDto>(HttpStatusCode.BadRequest, ModelStateErrors());
         return StatusCode(response.StatusCode, response);
     }
+
+    [HttpPut("update-profile-photo")]
+    public async Task<IActionResult> UpdateProfilePhoto([FromForm]ProfilePhotoDto photo)
+    {
+        if (ModelState.IsValid)
+        {
+            var userId = User.Claims.FirstOrDefault(x => x.Type == "sid")!.Value;
+            var result = await userProfileService.UpdateProfilePhoto(photo, userId);
+            return StatusCode(result.StatusCode, result);
+        }
+
+        var response = new Response<string>(HttpStatusCode.BadRequest, ModelStateErrors());
+        return StatusCode(response.StatusCode, response);
+    }
+
+    [HttpDelete("delete-profile-photo")]
+    public async Task<IActionResult> DeleteProfilePhoto()
+    {
+        var userId = User.Claims.FirstOrDefault(x => x.Type == "sid")!.Value;
+        var result = await userProfileService.DeleteProfilePhoto(userId);
+        return StatusCode(result.StatusCode, result);
+    }
     
     [HttpGet("get-post-favorites")]
     public async Task<IActionResult> GetPostFavorites([FromQuery] PaginationFilter filter)
@@ -42,13 +64,12 @@ public class UserProfileController(IUserProfileService userProfileService,
         var result = await postService.GetPostFavorites(filter, userId);
         return StatusCode(result.StatusCode, result);
     }
-
     
     // statistic profile
     /*[HttpGet("CounterProfile")]
     public async Task<Response<GetStatistic>> GetCountPost()
     {
-        var userId = User.Claims.FirstOrDefault(c => c.Type == "sid")!.Value;
+        var userId = ApplicationUser.Claims.FirstOrDefault(c => c.Type == "sid")!.Value;
         var post = await statisticFollowAndPostService.GetUserPost(userId);
         var following = await statisticFollowAndPostService.GetFollowing(userId);
         var follower = await statisticFollowAndPostService.GetFollowers(userId);

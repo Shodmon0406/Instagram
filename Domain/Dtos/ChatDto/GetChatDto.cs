@@ -1,6 +1,9 @@
-﻿namespace Domain.Dtos.ChatDto;
+﻿using System.ComponentModel.DataAnnotations;
+using Domain.Dtos.UserDto;
+
+namespace Domain.Dtos.ChatDto;
 
 public class GetChatDto : ChatDto
 {
-    public string SendUserId { get; set; } = null!;
+    [Required] public GetUserShortInfoDto ReceiveUser { get; set; } = null!;
 }

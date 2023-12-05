@@ -6,6 +6,4 @@ public class ChatDto
 {
     [Required]
     public int ChatId { get; set; }
-
-    [Required] public string ReceiveUserId { get; set; } = null!;
 }

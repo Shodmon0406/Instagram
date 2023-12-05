@@ -1,10 +1,12 @@
-﻿namespace Domain.Dtos.UserDto;
+﻿using Domain.Dtos.UserDto;
 
-public class GetUserShortInfoDto
+namespace Domain.Dtos.StoryDtos;
+
+public class GetStoriesDto
 {
     public string UserId { get; set; } = null!;
     public string UserName { get; set; } = null!;
     public string UserPhoto { get; set; } = null!;
     public string Fullname { get; set; } = null!;
-    public bool Subscriptions { get; set; }
+    public List<GetStoryDto> Stories { get; set; } = null!;
 }
