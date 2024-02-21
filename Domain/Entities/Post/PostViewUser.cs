@@ -7,6 +7,7 @@ public class PostViewUser
 {
     [Key]
     public int Id { get; set; }
+    [MaxLength(50)]
     public string ApplicationUserId { get; set; } = null!;
     public ApplicationUser ApplicationUser { get; set; } = null!;
     public int PostViewId { get; set; }

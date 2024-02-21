@@ -6,10 +6,12 @@ namespace Domain.Entities.Post;
 public class Post
 {
     public int PostId { get; set; }
+    [MaxLength(50)]
     public string ApplicationUserId { get; set; } = null!;
     public ApplicationUser ApplicationUser { get; set; } = null!;
-    [MaxLength(45)]
+    [MaxLength(50)]
     public string? Title { get; set; }
+    [MaxLength(1000)]
     public string? Content { get; set; }
     public DateTime DatePublished { get; set; }
     public List<Story> Stories { get; set; } = null!;

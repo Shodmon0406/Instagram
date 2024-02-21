@@ -14,13 +14,9 @@ public class StatisticFollowAndPostService(DataContext context)
         {
             var existing = context.Users.FirstOrDefault(x => x.Id == userId);
 
-            if (existing != null)
-            {
-                var post = await context.Posts.Where(x => x.ApplicationUser.Id == userId).CountAsync();
-                return new Response<int>(post);
-            }
-
-            return new Response<int>(HttpStatusCode.NotFound, "not found");
+            if (existing == null) return new Response<int>(HttpStatusCode.NotFound, "not found");
+            var post = await context.Posts.Where(x => x.ApplicationUser.Id == userId).CountAsync();
+            return new Response<int>(post);
         }
         catch (Exception e)
         {
@@ -35,7 +31,8 @@ public class StatisticFollowAndPostService(DataContext context)
             var user = await context.Users.FirstOrDefaultAsync(x => x.Id == userId);
             if (user != null)
             {
-                var userFollow = await context.FollowingRelationShips.Where(x => x.ApplicationUserId == userId).CountAsync();
+                var userFollow = await context.FollowingRelationShips.Where(x => x.ApplicationUserId == userId)
+                    .CountAsync();
                 return new Response<int>(userFollow);
             }
 

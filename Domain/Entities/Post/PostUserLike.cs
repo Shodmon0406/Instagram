@@ -11,6 +11,7 @@ public class PostUserLike
     [Key]
     public int Id { get; set; }
 
+    [MaxLength(50)]
     public string ApplicationUserId { get; set; } = null!;
     public ApplicationUser ApplicationUser { get; set; } = null!;
     public int PostLikeId { get; set; }

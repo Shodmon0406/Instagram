@@ -4,6 +4,7 @@ using Infrastructure.Seed;
 using Infrastructure.Services;
 using Infrastructure.Services.AccountService;
 using Infrastructure.Services.ChatService;
+using Infrastructure.Services.Email;
 using Infrastructure.Services.FileService;
 using Infrastructure.Services.FollowingRelationShipService;
 using Infrastructure.Services.NotificationService;

@@ -7,9 +7,11 @@ public class Story
 {
     [Key]
     public int Id { get; set; }
-    public string? FileName { get; set; }
+
+    [MaxLength(60)] public string FileName { get; set; } = null!;
     public int? PostId { get; set; }
     public DateTime CreateAt { get; set; } = DateTime.UtcNow;
+    [MaxLength(50)]
     public string ApplicationUserId { get; set; } = null!;
     public ApplicationUser ApplicationUser { get; set; }  = null!;
 

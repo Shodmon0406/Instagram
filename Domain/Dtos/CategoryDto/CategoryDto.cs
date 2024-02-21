@@ -1,6 +1,8 @@
-﻿namespace Domain.Dtos.CategoryDto;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Domain.Dtos.CategoryDto;
 
 public class CategoryDto
 {
-    public string CategoryName { get; set; }
+    [MaxLength(50)] public string CategoryName { get; set; } = null!;
 }

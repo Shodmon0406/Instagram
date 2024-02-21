@@ -2,7 +2,6 @@
 using AutoMapper;
 using Domain.Dtos.StoryDtos;
 using Domain.Dtos.ViewerDtos;
-using Domain.Entities;
 using Domain.Entities.Post;
 using Domain.Responses;
 using Infrastructure.Data;
@@ -12,8 +11,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Services.StoryServices;
 
-public class StoryService(IFileService fileService, IMapper mapper, DataContext context,
-        IWebHostEnvironment hostEnvironment)
+public class StoryService(
+    IFileService fileService,
+    IMapper mapper,
+    DataContext context,
+    IWebHostEnvironment hostEnvironment)
     : IStoryService
 
 {
@@ -95,36 +97,32 @@ public class StoryService(IFileService fileService, IMapper mapper, DataContext 
         }
     }
 
-    public async Task<Response<GetStoryDto>> AddStory(AddStoryDto file, string userId)
+    public async Task<Response<GetStoryDto>> AddStory(AddStoryDto storyDto, string userId)
     {
         try
         {
             var file1 = new Story()
             {
                 ApplicationUserId = userId,
-                PostId = file.PostId,
+                PostId = storyDto.PostId,
             };
             if (file1.PostId == null)
             {
-                var fileName = fileService.CreateFile(file.Image).Data;
+                var fileName = fileService.CreateFile(storyDto.Image).Data;
                 file1.FileName = fileName;
             }
             else
             {
-                var post = (from p in context.Posts
-                    join image in context.Images on p.PostId equals image.PostId
-                    select new
-                    {
-                        Image = image.ImageName
-                    }).ToList();
-                if (post != null)
+                var image = await context.Images.Where(x => x.PostId == storyDto.PostId)
+                    .Select(x => x.ImageName)
+                    .FirstOrDefaultAsync();
+                if (image != null)
                 {
-                    var img = post[0];
-                    file1.FileName = img.Image;
+                    file1.FileName = image;
                 }
                 else
                 {
-                    new Response<GetStoryDto>(HttpStatusCode.BadRequest, "Post not found");
+                    return new Response<GetStoryDto>(HttpStatusCode.BadRequest, "Post not found");
                 }
             }
 
@@ -146,21 +144,21 @@ public class StoryService(IFileService fileService, IMapper mapper, DataContext 
         }
     }
 
-    public async Task<Response<string>> StoryLike(int StoryId, string userId)
+    public async Task<Response<string>> StoryLike(int storyId, string userId)
     {
         try
         {
-            var story = await context.Stories.FindAsync(StoryId);
+            var story = await context.Stories.FindAsync(storyId);
             if (story == null) return new Response<string>(HttpStatusCode.BadRequest, "Story not found");
             var user = await context.StoryLikes.FirstOrDefaultAsync(e =>
-                e.ApplicationUserId == userId && e.StoryId == StoryId);
+                e.ApplicationUserId == userId && e.StoryId == storyId);
             var stat = await context.StoryStats.FirstAsync(s => s.StoryId == story.Id);
             if (user == null)
             {
                 stat.ViewLike++;
                 var storyLike = new StoryLike()
                 {
-                    StoryId = StoryId,
+                    StoryId = storyId,
                     ApplicationUserId = userId,
                 };
                 await context.StoryLikes.AddAsync(storyLike);
@@ -186,16 +184,13 @@ public class StoryService(IFileService fileService, IMapper mapper, DataContext 
         try
         {
             var story = context.Stories.FirstOrDefault(e => e.Id == id);
-            if (story != null)
-            {
-                var path = Path.Combine(hostEnvironment.WebRootPath, "images", story.FileName);
-                File.Delete(path);
-                context.Stories.Remove(story);
-                await context.SaveChangesAsync();
-                return new Response<bool>(true);
-            }
+            if (story == null) return new Response<bool>(false);
+            var path = Path.Combine(hostEnvironment.WebRootPath, "images", story.FileName);
+            File.Delete(path);
+            context.Stories.Remove(story);
+            await context.SaveChangesAsync();
+            return new Response<bool>(true);
 
-            return new Response<bool>(false);
         }
         catch (Exception e)
         {

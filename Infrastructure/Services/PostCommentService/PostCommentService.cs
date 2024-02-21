@@ -76,20 +76,17 @@ public class PostCommentService(DataContext context, IMapper mapper) : IPostComm
         if (like != null)
         {
              context.ListOfUserCommentLikes.Remove(like);
-            countLike.LikeCount--;
+            countLike!.LikeCount--;
             await context.PostCommentLikes.AddAsync(countLike);
             await context.SaveChangesAsync();
             return new Response<bool>(true);
         }
-        await context.ListOfUserCommentLikes.AddAsync(like);
-        countLike.LikeCount++;
+        await context.ListOfUserCommentLikes.AddAsync(like!);
+        countLike!.LikeCount++;
         await context.PostCommentLikes.AddAsync(countLike);
         await context.SaveChangesAsync();
         return new Response<bool>(true);
     }
-
-
-
 
     public async Task<Response<bool>> DeletePostComment(int id)
     {

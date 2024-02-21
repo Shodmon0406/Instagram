@@ -25,8 +25,8 @@ public class StoryViewService(DataContext context, IMapper mapper) : IStoryViewS
                 var existView =
                     await context.StoryUsers.FirstOrDefaultAsync(e =>
                         e.StoryId == model.StoryId && e.ApplicationUserId == userId);
-                var stat = context.StoryStats.FirstOrDefault(e => e.StoryId == story.Id);
-                if (existView == null)
+                var stat = await context.StoryStats.FirstOrDefaultAsync(e => e.StoryId == story.Id);
+                if (existView == null && stat != null)
                 {
                     stat.ViewCount++;
                     var view = new StoryUser()
