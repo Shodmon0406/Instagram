@@ -12,7 +12,6 @@ using Domain.Responses;
 using Infrastructure.Data;
 using Infrastructure.Services.FileService;
 using Microsoft.EntityFrameworkCore;
-using static System.Guid;
 
 namespace Infrastructure.Services.PostService;
 
@@ -88,7 +87,6 @@ public class PostService(DataContext context, IMapper mapper, IFileService fileS
                             DateCommented = s.DateCommented
                         }).OrderByDescending(c => c.DateCommented).ToList(),
                     })
-                .OrderBy(x => NewGuid())
                 .Skip((filter.PageNumber - 1) * filter.PageSize)
                 .Take(filter.PageSize)
                 .AsNoTracking().ToListAsync();
@@ -173,7 +171,6 @@ public class PostService(DataContext context, IMapper mapper, IFileService fileS
                             DateCommented = s.DateCommented
                         }).OrderByDescending(c => c.DateCommented).ToList()
                     })
-                .OrderBy(x => NewGuid())
                 .Skip(int.Abs(filter.PageNumber - 1) * filter.PageSize)
                 .Take(filter.PageSize).AsNoTracking().ToListAsync();
             return new PagedResponse<List<GetReelsDto>>(result, filter.PageNumber, filter.PageSize, totalRecord);
