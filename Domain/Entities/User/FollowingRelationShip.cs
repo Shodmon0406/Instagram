@@ -5,15 +5,17 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Domain.Entities.User;
 
-[Index("UserId", "FollowingId", IsUnique = true)]
+[Index("ApplicationUserId", "FollowingId", IsUnique = true)]
 public class FollowingRelationShip
 {
     [Key]
     public int FollowingRelationShipId { get; set; }
 
-    public string UserId { get; set; } = null!;
-    public User User { get; set; } = null!;
+    [MaxLength(50)]
+    public string ApplicationUserId { get; set; } = null!;
+    public ApplicationUser ApplicationUser { get; set; } = null!;
+    [MaxLength(50)]
     public string FollowingId { get; set; } = null!;
-    public User Following { get; set; } = null!;
+    public ApplicationUser Following { get; set; } = null!;
     public DateTime DateFollowed { get; set; }
 }

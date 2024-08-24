@@ -49,39 +49,6 @@ namespace Infrastructure.Migrations
                     b.ToTable("Chats");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Location", b =>
-                {
-                    b.Property<int>("LocationId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("LocationId"));
-
-                    b.Property<string>("City")
-                        .IsRequired()
-                        .HasMaxLength(45)
-                        .HasColumnType("character varying(45)");
-
-                    b.Property<string>("Country")
-                        .IsRequired()
-                        .HasMaxLength(45)
-                        .HasColumnType("character varying(45)");
-
-                    b.Property<string>("State")
-                        .IsRequired()
-                        .HasMaxLength(45)
-                        .HasColumnType("character varying(45)");
-
-                    b.Property<string>("ZipCode")
-                        .IsRequired()
-                        .HasMaxLength(45)
-                        .HasColumnType("character varying(45)");
-
-                    b.HasKey("LocationId");
-
-                    b.ToTable("Locations");
-                });
-
             modelBuilder.Entity("Domain.Entities.Message", b =>
                 {
                     b.Property<int>("MessageId")
@@ -89,6 +56,10 @@ namespace Infrastructure.Migrations
                         .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("MessageId"));
+
+                    b.Property<string>("ApplicationUserId")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<int>("ChatId")
                         .HasColumnType("integer");
@@ -100,15 +71,11 @@ namespace Infrastructure.Migrations
                     b.Property<DateTime>("SendMassageDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.HasKey("MessageId");
 
-                    b.HasIndex("ChatId");
+                    b.HasIndex("ApplicationUserId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("ChatId");
 
                     b.ToTable("Messages");
                 });
@@ -157,6 +124,30 @@ namespace Infrastructure.Migrations
                     b.ToTable("Images");
                 });
 
+            modelBuilder.Entity("Domain.Entities.Post.ListOfUserCommentLike", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ApplicationUserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("PostCommentLikeId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApplicationUserId");
+
+                    b.HasIndex("PostCommentLikeId");
+
+                    b.ToTable("ListOfUserCommentLikes");
+                });
+
             modelBuilder.Entity("Domain.Entities.Post.Post", b =>
                 {
                     b.Property<int>("PostId")
@@ -164,6 +155,10 @@ namespace Infrastructure.Migrations
                         .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("PostId"));
+
+                    b.Property<string>("ApplicationUserId")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<string>("Content")
                         .HasColumnType("text");
@@ -175,13 +170,9 @@ namespace Infrastructure.Migrations
                         .HasMaxLength(45)
                         .HasColumnType("character varying(45)");
 
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.HasKey("PostId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("ApplicationUserId");
 
                     b.ToTable("Posts");
                 });
@@ -217,6 +208,10 @@ namespace Infrastructure.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("PostCommentId"));
 
+                    b.Property<string>("ApplicationUserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("Comment")
                         .IsRequired()
                         .HasColumnType("text");
@@ -227,15 +222,11 @@ namespace Infrastructure.Migrations
                     b.Property<int>("PostId")
                         .HasColumnType("integer");
 
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.HasKey("PostCommentId");
 
-                    b.HasIndex("PostId");
+                    b.HasIndex("ApplicationUserId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("PostId");
 
                     b.ToTable("PostComments");
                 });
@@ -258,15 +249,15 @@ namespace Infrastructure.Migrations
                     b.Property<int>("PostId")
                         .HasColumnType("integer");
 
+                    b.Property<string>("ApplicationUserId")
+                        .HasColumnType("text");
+
                     b.Property<int>("FavoriteCount")
                         .HasColumnType("integer");
 
-                    b.Property<string>("UserId")
-                        .HasColumnType("text");
-
                     b.HasKey("PostId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("ApplicationUserId");
 
                     b.ToTable("PostFavorites");
                 });
@@ -279,18 +270,18 @@ namespace Infrastructure.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("PostFavoriteId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("UserId")
+                    b.Property<string>("ApplicationUserId")
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<int>("PostFavoriteId")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("PostFavoriteId");
+                    b.HasIndex("ApplicationUserId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("PostFavoriteId");
 
                     b.ToTable("PostFavoriteUsers");
                 });
@@ -319,18 +310,18 @@ namespace Infrastructure.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("PostLikeId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("UserId")
+                    b.Property<string>("ApplicationUserId")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<int>("PostLikeId")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
                     b.HasIndex("PostLikeId");
 
-                    b.HasIndex("UserId", "PostLikeId")
+                    b.HasIndex("ApplicationUserId", "PostLikeId")
                         .IsUnique();
 
                     b.ToTable("PostUserLikes");
@@ -357,23 +348,23 @@ namespace Infrastructure.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("PostViewId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("UserId")
+                    b.Property<string>("ApplicationUserId")
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<int>("PostViewId")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("PostViewId");
+                    b.HasIndex("ApplicationUserId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("PostViewId");
 
                     b.ToTable("PostViewUsers");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Post.StoryLike", b =>
+            modelBuilder.Entity("Domain.Entities.Post.Story", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -381,101 +372,9 @@ namespace Infrastructure.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("StoryId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("UserId")
+                    b.Property<string>("ApplicationUserId")
                         .IsRequired()
                         .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("StoryId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("StoryLikes");
-                });
-
-            modelBuilder.Entity("Domain.Entities.Post.StoryUser", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("StoryId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("StoryId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("StoryUsers");
-                });
-
-            modelBuilder.Entity("Domain.Entities.Post.StoryView", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("StoryId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("ViewUserId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("StoryId");
-
-                    b.ToTable("StoryViews");
-                });
-
-            modelBuilder.Entity("Domain.Entities.SearchHistory", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("SearchDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Text")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("SearchHistories");
-                });
-
-            modelBuilder.Entity("Domain.Entities.Story", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreateAt")
                         .HasColumnType("timestamp with time zone");
@@ -486,18 +385,40 @@ namespace Infrastructure.Migrations
                     b.Property<int?>("PostId")
                         .HasColumnType("integer");
 
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.HasKey("Id");
+
+                    b.HasIndex("ApplicationUserId");
 
                     b.HasIndex("PostId");
 
                     b.ToTable("Stories");
                 });
 
-            modelBuilder.Entity("Domain.Entities.StoryStat", b =>
+            modelBuilder.Entity("Domain.Entities.Post.StoryLike", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ApplicationUserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("StoryId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApplicationUserId");
+
+                    b.HasIndex("StoryId");
+
+                    b.ToTable("StoryLikes");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Post.StoryStat", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -522,9 +443,156 @@ namespace Infrastructure.Migrations
                     b.ToTable("StoryStats");
                 });
 
+            modelBuilder.Entity("Domain.Entities.Post.StoryUser", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ApplicationUserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("StoryId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApplicationUserId");
+
+                    b.HasIndex("StoryId");
+
+                    b.ToTable("StoryUsers");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Post.StoryView", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ApplicationUserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("StoryId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApplicationUserId");
+
+                    b.HasIndex("StoryId");
+
+                    b.ToTable("StoryViews");
+                });
+
+            modelBuilder.Entity("Domain.Entities.SearchHistory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ApplicationUserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("SearchDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApplicationUserId");
+
+                    b.ToTable("SearchHistories");
+                });
+
+            modelBuilder.Entity("Domain.Entities.User.ApplicationUser", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("text");
+
+                    b.Property<int>("AccessFailedCount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("DateRegistered")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<bool>("EmailConfirmed")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("LockoutEnabled")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTimeOffset?>("LockoutEnd")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("NormalizedEmail")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<string>("NormalizedUserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<string>("PasswordHash")
+                        .HasColumnType("text");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("PhoneNumberConfirmed")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("SecurityStamp")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("TwoFactorEnabled")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("UserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<int>("UserType")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NormalizedEmail")
+                        .HasDatabaseName("EmailIndex");
+
+                    b.HasIndex("NormalizedUserName")
+                        .IsUnique()
+                        .HasDatabaseName("UserNameIndex");
+
+                    b.HasIndex("UserName")
+                        .IsUnique();
+
+                    b.ToTable("AspNetUsers", (string)null);
+                });
+
             modelBuilder.Entity("Domain.Entities.User.ExternalAccount", b =>
                 {
-                    b.Property<string>("UserId")
+                    b.Property<string>("ApplicationUserId")
                         .HasColumnType("text");
 
                     b.Property<string>("FacebookEmail")
@@ -535,7 +603,7 @@ namespace Infrastructure.Migrations
                         .HasMaxLength(45)
                         .HasColumnType("character varying(45)");
 
-                    b.HasKey("UserId");
+                    b.HasKey("ApplicationUserId");
 
                     b.ToTable("ExternalAccounts");
                 });
@@ -548,6 +616,10 @@ namespace Infrastructure.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("FollowingRelationShipId"));
 
+                    b.Property<string>("ApplicationUserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<DateTime>("DateFollowed")
                         .HasColumnType("timestamp with time zone");
 
@@ -555,47 +627,19 @@ namespace Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.HasKey("FollowingRelationShipId");
 
                     b.HasIndex("FollowingId");
 
-                    b.HasIndex("UserId", "FollowingId")
+                    b.HasIndex("ApplicationUserId", "FollowingId")
                         .IsUnique();
 
                     b.ToTable("FollowingRelationShips");
                 });
 
-            modelBuilder.Entity("Domain.Entities.User.ListOfUserCommentLike", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("PostCommentLikeId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PostCommentLikeId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("ListOfUserCommentLikes");
-                });
-
             modelBuilder.Entity("Domain.Entities.User.UserProfile", b =>
                 {
-                    b.Property<string>("UserId")
+                    b.Property<string>("ApplicationUserId")
                         .HasColumnType("text");
 
                     b.Property<string>("About")
@@ -604,10 +648,10 @@ namespace Infrastructure.Migrations
                     b.Property<DateTime>("DateUpdated")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<DateTime>("Dob")
+                    b.Property<DateTimeOffset>("Dob")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("FirstName")
+                    b.Property<string>("FullName")
                         .HasColumnType("text");
 
                     b.Property<int?>("Gender")
@@ -616,20 +660,9 @@ namespace Infrastructure.Migrations
                     b.Property<string>("Image")
                         .HasColumnType("text");
 
-                    b.Property<string>("LastName")
-                        .HasColumnType("text");
+                    b.HasKey("ApplicationUserId");
 
-                    b.Property<int?>("LocationId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Occupation")
-                        .HasColumnType("text");
-
-                    b.HasKey("UserId");
-
-                    b.HasIndex("LocationId");
-
-                    b.HasIndex("UserId")
+                    b.HasIndex("ApplicationUserId")
                         .IsUnique();
 
                     b.ToTable("UserProfiles");
@@ -637,7 +670,7 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.User.UserSetting", b =>
                 {
-                    b.Property<string>("UserId")
+                    b.Property<string>("ApplicationUserId")
                         .HasColumnType("text");
 
                     b.Property<int>("NotificationsComments")
@@ -652,7 +685,7 @@ namespace Infrastructure.Migrations
                     b.Property<int>("NotificationsNewsletter")
                         .HasColumnType("integer");
 
-                    b.HasKey("UserId");
+                    b.HasKey("ApplicationUserId");
 
                     b.ToTable("UserSettings");
                 });
@@ -665,20 +698,22 @@ namespace Infrastructure.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("ApplicationUserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("ApplicationUserSearchId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<DateTime>("SearchDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("UserSearchId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("UserSearchId");
+                    b.HasIndex("ApplicationUserId");
+
+                    b.HasIndex("ApplicationUserSearchId");
 
                     b.ToTable("UserSearchHistories");
                 });
@@ -732,79 +767,6 @@ namespace Infrastructure.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("AspNetRoleClaims", (string)null);
-                });
-
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUser", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("text");
-
-                    b.Property<int>("AccessFailedCount")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("ConcurrencyStamp")
-                        .IsConcurrencyToken()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Discriminator")
-                        .IsRequired()
-                        .HasMaxLength(13)
-                        .HasColumnType("character varying(13)");
-
-                    b.Property<string>("Email")
-                        .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
-
-                    b.Property<bool>("EmailConfirmed")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("LockoutEnabled")
-                        .HasColumnType("boolean");
-
-                    b.Property<DateTimeOffset?>("LockoutEnd")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("NormalizedEmail")
-                        .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
-
-                    b.Property<string>("NormalizedUserName")
-                        .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
-
-                    b.Property<string>("PasswordHash")
-                        .HasColumnType("text");
-
-                    b.Property<string>("PhoneNumber")
-                        .HasColumnType("text");
-
-                    b.Property<bool>("PhoneNumberConfirmed")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("SecurityStamp")
-                        .HasColumnType("text");
-
-                    b.Property<bool>("TwoFactorEnabled")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("UserName")
-                        .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("NormalizedEmail")
-                        .HasDatabaseName("EmailIndex");
-
-                    b.HasIndex("NormalizedUserName")
-                        .IsUnique()
-                        .HasDatabaseName("UserNameIndex");
-
-                    b.ToTable("AspNetUsers", (string)null);
-
-                    b.HasDiscriminator<string>("Discriminator").HasValue("IdentityUser");
-
-                    b.UseTphMappingStrategy();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
@@ -888,31 +850,15 @@ namespace Infrastructure.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("Domain.Entities.User.User", b =>
-                {
-                    b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityUser");
-
-                    b.Property<DateTime>("DateRegistred")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("UserType")
-                        .HasColumnType("integer");
-
-                    b.HasIndex("UserName")
-                        .IsUnique();
-
-                    b.HasDiscriminator().HasValue("User");
-                });
-
             modelBuilder.Entity("Domain.Entities.Chat", b =>
                 {
-                    b.HasOne("Domain.Entities.User.User", "ReceiveUser")
+                    b.HasOne("Domain.Entities.User.ApplicationUser", "ReceiveUser")
                         .WithMany()
                         .HasForeignKey("ReceiveUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Domain.Entities.User.User", "SendUser")
+                    b.HasOne("Domain.Entities.User.ApplicationUser", "SendUser")
                         .WithMany()
                         .HasForeignKey("SendUserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -925,21 +871,21 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.Message", b =>
                 {
+                    b.HasOne("Domain.Entities.User.ApplicationUser", "ApplicationUser")
+                        .WithMany()
+                        .HasForeignKey("ApplicationUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Domain.Entities.Chat", "Chat")
                         .WithMany("Messages")
                         .HasForeignKey("ChatId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Domain.Entities.User.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Navigation("ApplicationUser");
 
                     b.Navigation("Chat");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Domain.Entities.Post.Image", b =>
@@ -953,15 +899,34 @@ namespace Infrastructure.Migrations
                     b.Navigation("Post");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Post.Post", b =>
+            modelBuilder.Entity("Domain.Entities.Post.ListOfUserCommentLike", b =>
                 {
-                    b.HasOne("Domain.Entities.User.User", "User")
-                        .WithMany("Posts")
-                        .HasForeignKey("UserId")
+                    b.HasOne("Domain.Entities.User.ApplicationUser", "ApplicationUser")
+                        .WithMany("ListOfUserCommentLikes")
+                        .HasForeignKey("ApplicationUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("User");
+                    b.HasOne("Domain.Entities.Post.PostCommentLike", "PostCommentLike")
+                        .WithMany()
+                        .HasForeignKey("PostCommentLikeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ApplicationUser");
+
+                    b.Navigation("PostCommentLike");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Post.Post", b =>
+                {
+                    b.HasOne("Domain.Entities.User.ApplicationUser", "ApplicationUser")
+                        .WithMany("Posts")
+                        .HasForeignKey("ApplicationUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ApplicationUser");
                 });
 
             modelBuilder.Entity("Domain.Entities.Post.PostCategory", b =>
@@ -985,21 +950,21 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.Post.PostComment", b =>
                 {
+                    b.HasOne("Domain.Entities.User.ApplicationUser", "ApplicationUser")
+                        .WithMany("PostComments")
+                        .HasForeignKey("ApplicationUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Domain.Entities.Post.Post", "Post")
                         .WithMany("PostComments")
                         .HasForeignKey("PostId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Domain.Entities.User.User", "User")
-                        .WithMany("PostComments")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Navigation("ApplicationUser");
 
                     b.Navigation("Post");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Domain.Entities.Post.PostCommentLike", b =>
@@ -1015,36 +980,36 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.Post.PostFavorite", b =>
                 {
+                    b.HasOne("Domain.Entities.User.ApplicationUser", null)
+                        .WithMany("PostFavorites")
+                        .HasForeignKey("ApplicationUserId");
+
                     b.HasOne("Domain.Entities.Post.Post", "Post")
                         .WithOne("PostFavorite")
                         .HasForeignKey("Domain.Entities.Post.PostFavorite", "PostId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Domain.Entities.User.User", null)
-                        .WithMany("PostFavorites")
-                        .HasForeignKey("UserId");
-
                     b.Navigation("Post");
                 });
 
             modelBuilder.Entity("Domain.Entities.Post.PostFavoriteUser", b =>
                 {
+                    b.HasOne("Domain.Entities.User.ApplicationUser", "ApplicationUser")
+                        .WithMany()
+                        .HasForeignKey("ApplicationUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Domain.Entities.Post.PostFavorite", "PostFavorite")
                         .WithMany("PostFavoriteUsers")
                         .HasForeignKey("PostFavoriteId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Domain.Entities.User.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Navigation("ApplicationUser");
 
                     b.Navigation("PostFavorite");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Domain.Entities.Post.PostLike", b =>
@@ -1060,21 +1025,21 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.Post.PostUserLike", b =>
                 {
+                    b.HasOne("Domain.Entities.User.ApplicationUser", "ApplicationUser")
+                        .WithMany("PostUserLikes")
+                        .HasForeignKey("ApplicationUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Domain.Entities.Post.PostLike", "PostLike")
                         .WithMany("PostUserLikes")
                         .HasForeignKey("PostLikeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Domain.Entities.User.User", "User")
-                        .WithMany("PostUserLikes")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Navigation("ApplicationUser");
 
                     b.Navigation("PostLike");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Domain.Entities.Post.PostView", b =>
@@ -1090,189 +1055,188 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.Post.PostViewUser", b =>
                 {
+                    b.HasOne("Domain.Entities.User.ApplicationUser", "ApplicationUser")
+                        .WithMany()
+                        .HasForeignKey("ApplicationUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Domain.Entities.Post.PostView", "PostView")
                         .WithMany("PostViewUsers")
                         .HasForeignKey("PostViewId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Domain.Entities.User.User", "User")
+                    b.Navigation("ApplicationUser");
+
+                    b.Navigation("PostView");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Post.Story", b =>
+                {
+                    b.HasOne("Domain.Entities.User.ApplicationUser", "ApplicationUser")
                         .WithMany()
-                        .HasForeignKey("UserId")
+                        .HasForeignKey("ApplicationUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("PostView");
+                    b.HasOne("Domain.Entities.Post.Post", "Post")
+                        .WithMany("Stories")
+                        .HasForeignKey("PostId");
 
-                    b.Navigation("User");
+                    b.Navigation("ApplicationUser");
+
+                    b.Navigation("Post");
                 });
 
             modelBuilder.Entity("Domain.Entities.Post.StoryLike", b =>
                 {
-                    b.HasOne("Domain.Entities.Story", "Story")
+                    b.HasOne("Domain.Entities.User.ApplicationUser", "ApplicationUser")
+                        .WithMany("StoryLikes")
+                        .HasForeignKey("ApplicationUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entities.Post.Story", "Story")
                         .WithMany("StoryLikes")
                         .HasForeignKey("StoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Domain.Entities.User.User", "User")
-                        .WithMany("StoryLikes")
-                        .HasForeignKey("UserId")
+                    b.Navigation("ApplicationUser");
+
+                    b.Navigation("Story");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Post.StoryStat", b =>
+                {
+                    b.HasOne("Domain.Entities.Post.Story", "Story")
+                        .WithOne("StoryStat")
+                        .HasForeignKey("Domain.Entities.Post.StoryStat", "StoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Story");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Domain.Entities.Post.StoryUser", b =>
                 {
-                    b.HasOne("Domain.Entities.Story", "Story")
+                    b.HasOne("Domain.Entities.User.ApplicationUser", "ApplicationUser")
+                        .WithMany("StoryUsers")
+                        .HasForeignKey("ApplicationUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entities.Post.Story", "Story")
                         .WithMany("StoryUsers")
                         .HasForeignKey("StoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Domain.Entities.User.User", "User")
-                        .WithMany("StoryUsers")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Navigation("ApplicationUser");
 
                     b.Navigation("Story");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Domain.Entities.Post.StoryView", b =>
                 {
-                    b.HasOne("Domain.Entities.Story", "Story")
+                    b.HasOne("Domain.Entities.User.ApplicationUser", "ApplicationUser")
+                        .WithMany()
+                        .HasForeignKey("ApplicationUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entities.Post.Story", "Story")
                         .WithMany("StoryViews")
                         .HasForeignKey("StoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("ApplicationUser");
 
                     b.Navigation("Story");
                 });
 
             modelBuilder.Entity("Domain.Entities.SearchHistory", b =>
                 {
-                    b.HasOne("Domain.Entities.User.User", "User")
+                    b.HasOne("Domain.Entities.User.ApplicationUser", "ApplicationUser")
                         .WithMany()
-                        .HasForeignKey("UserId")
+                        .HasForeignKey("ApplicationUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Domain.Entities.Story", b =>
-                {
-                    b.HasOne("Domain.Entities.Post.Post", "Post")
-                        .WithMany("Stories")
-                        .HasForeignKey("PostId");
-
-                    b.Navigation("Post");
-                });
-
-            modelBuilder.Entity("Domain.Entities.StoryStat", b =>
-                {
-                    b.HasOne("Domain.Entities.Story", "Story")
-                        .WithOne("StoryStat")
-                        .HasForeignKey("Domain.Entities.StoryStat", "StoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Story");
+                    b.Navigation("ApplicationUser");
                 });
 
             modelBuilder.Entity("Domain.Entities.User.ExternalAccount", b =>
                 {
-                    b.HasOne("Domain.Entities.User.User", "User")
+                    b.HasOne("Domain.Entities.User.ApplicationUser", "ApplicationUser")
                         .WithOne("ExternalAccount")
-                        .HasForeignKey("Domain.Entities.User.ExternalAccount", "UserId")
+                        .HasForeignKey("Domain.Entities.User.ExternalAccount", "ApplicationUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("User");
+                    b.Navigation("ApplicationUser");
                 });
 
             modelBuilder.Entity("Domain.Entities.User.FollowingRelationShip", b =>
                 {
-                    b.HasOne("Domain.Entities.User.User", "Following")
+                    b.HasOne("Domain.Entities.User.ApplicationUser", "ApplicationUser")
+                        .WithMany("FollowingRelationShips")
+                        .HasForeignKey("ApplicationUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entities.User.ApplicationUser", "Following")
                         .WithMany()
                         .HasForeignKey("FollowingId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Domain.Entities.User.User", "User")
-                        .WithMany("FollowingRelationShips")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Navigation("ApplicationUser");
 
                     b.Navigation("Following");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Domain.Entities.User.ListOfUserCommentLike", b =>
-                {
-                    b.HasOne("Domain.Entities.Post.PostCommentLike", "PostCommentLike")
-                        .WithMany()
-                        .HasForeignKey("PostCommentLikeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Entities.User.User", "User")
-                        .WithMany("ListOfUserCommentLikes")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("PostCommentLike");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Domain.Entities.User.UserProfile", b =>
                 {
-                    b.HasOne("Domain.Entities.Location", "Location")
-                        .WithMany("UserProfiles")
-                        .HasForeignKey("LocationId");
-
-                    b.HasOne("Domain.Entities.User.User", "User")
+                    b.HasOne("Domain.Entities.User.ApplicationUser", "ApplicationUser")
                         .WithOne("UserProfile")
-                        .HasForeignKey("Domain.Entities.User.UserProfile", "UserId")
+                        .HasForeignKey("Domain.Entities.User.UserProfile", "ApplicationUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Location");
-
-                    b.Navigation("User");
+                    b.Navigation("ApplicationUser");
                 });
 
             modelBuilder.Entity("Domain.Entities.User.UserSetting", b =>
                 {
-                    b.HasOne("Domain.Entities.User.User", "User")
+                    b.HasOne("Domain.Entities.User.ApplicationUser", "ApplicationUser")
                         .WithOne("UserSetting")
-                        .HasForeignKey("Domain.Entities.User.UserSetting", "UserId")
+                        .HasForeignKey("Domain.Entities.User.UserSetting", "ApplicationUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("User");
+                    b.Navigation("ApplicationUser");
                 });
 
             modelBuilder.Entity("Domain.Entities.UserSearchHistory", b =>
                 {
-                    b.HasOne("Domain.Entities.User.User", "UserSearch")
+                    b.HasOne("Domain.Entities.User.ApplicationUser", "ApplicationUser")
                         .WithMany()
-                        .HasForeignKey("UserSearchId")
+                        .HasForeignKey("ApplicationUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("UserSearch");
+                    b.HasOne("Domain.Entities.User.ApplicationUser", "ApplicationUserSearch")
+                        .WithMany("UserSearchHistories")
+                        .HasForeignKey("ApplicationUserSearchId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ApplicationUser");
+
+                    b.Navigation("ApplicationUserSearch");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -1286,7 +1250,7 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
+                    b.HasOne("Domain.Entities.User.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1295,7 +1259,7 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
+                    b.HasOne("Domain.Entities.User.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1310,7 +1274,7 @@ namespace Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
+                    b.HasOne("Domain.Entities.User.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1319,7 +1283,7 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
+                    b.HasOne("Domain.Entities.User.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1329,11 +1293,6 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Domain.Entities.Chat", b =>
                 {
                     b.Navigation("Messages");
-                });
-
-            modelBuilder.Entity("Domain.Entities.Location", b =>
-                {
-                    b.Navigation("UserProfiles");
                 });
 
             modelBuilder.Entity("Domain.Entities.Post.Category", b =>
@@ -1382,7 +1341,7 @@ namespace Infrastructure.Migrations
                     b.Navigation("PostViewUsers");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Story", b =>
+            modelBuilder.Entity("Domain.Entities.Post.Story", b =>
                 {
                     b.Navigation("StoryLikes");
 
@@ -1394,7 +1353,7 @@ namespace Infrastructure.Migrations
                     b.Navigation("StoryViews");
                 });
 
-            modelBuilder.Entity("Domain.Entities.User.User", b =>
+            modelBuilder.Entity("Domain.Entities.User.ApplicationUser", b =>
                 {
                     b.Navigation("ExternalAccount")
                         .IsRequired();
@@ -1417,6 +1376,8 @@ namespace Infrastructure.Migrations
 
                     b.Navigation("UserProfile")
                         .IsRequired();
+
+                    b.Navigation("UserSearchHistories");
 
                     b.Navigation("UserSetting")
                         .IsRequired();

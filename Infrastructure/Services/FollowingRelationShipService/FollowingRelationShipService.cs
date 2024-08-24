@@ -1,5 +1,4 @@
 ﻿using System.Net;
-using AutoMapper;
 using Domain.Dtos.FollowingRelationshipDto;
 using Domain.Dtos.UserDto;
 using Domain.Entities.User;
@@ -10,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Services.FollowingRelationShipService;
 
-public class FollowingRelationShipService(DataContext context, IMapper mapper) : IFollowingRelationShipService
+public class FollowingRelationShipService(DataContext context) : IFollowingRelationShipService
 {
     public async Task<Response<GetFollowingRelationShipDto>> GetFollowingRelationShip(
         FollowingRelationShipFilter filter)
@@ -28,14 +27,14 @@ public class FollowingRelationShipService(DataContext context, IMapper mapper) :
                             Id = fr.FollowingRelationShipId,
                             UserShortInfo = new GetUserShortInfoDto()
                             {
-                                UserId = fr.UserId,
-                                UserName = fr.User.UserName,
-                                Fullname = (fr.User.UserProfile.FirstName + " " + fr.User.UserProfile.LastName),
-                                UserPhoto = fr.User.UserProfile.Image
+                                UserId = fr.ApplicationUserId,
+                                UserName = fr.ApplicationUser.UserName,
+                                Fullname = fr.ApplicationUser.UserProfile.FullName,
+                                UserPhoto = fr.ApplicationUser.UserProfile.Image
                             }
                         }).ToList(),
                     Subscriptions = (from fr in followingRelationShips
-                        where fr.UserId == filter.UserId
+                        where fr.ApplicationUserId == filter.UserId
                         select new SubscriptionsDto()
                         {
                             Id = fr.FollowingRelationShipId,
@@ -44,12 +43,11 @@ public class FollowingRelationShipService(DataContext context, IMapper mapper) :
                                 UserId = fr.FollowingId,
                                 UserName = fr.Following.UserName,
                                 Fullname =
-                                    (fr.Following.UserProfile.FirstName + " " + fr.Following.UserProfile.LastName),
+                                    fr.Following.UserProfile.FullName,
                                 UserPhoto = fr.Following.UserProfile.Image
                             }
                         }).ToList()
                 }).AsNoTracking().FirstOrDefaultAsync();
-            var totalRecord = followingRelationShips.Count();
             return new Response<GetFollowingRelationShipDto>(response);
         }
         catch (Exception e)
@@ -69,10 +67,10 @@ public class FollowingRelationShipService(DataContext context, IMapper mapper) :
                     Id = fr.FollowingRelationShipId,
                     UserShortInfo = new GetUserShortInfoDto()
                     {
-                        UserId = fr.UserId,
-                        UserName = fr.User.UserName,
-                        Fullname = (fr.User.UserProfile.FirstName + " " + fr.User.UserProfile.LastName),
-                        UserPhoto = fr.User.UserProfile.Image
+                        UserId = fr.ApplicationUserId,
+                        UserName = fr.ApplicationUser.UserName,
+                        Fullname = fr.ApplicationUser.UserProfile.FullName,
+                        UserPhoto = fr.ApplicationUser.UserProfile.Image
                     }
                 }).AsNoTracking().ToListAsync();
             return new Response<List<SubscribersDto>>(subscribers);
@@ -88,7 +86,7 @@ public class FollowingRelationShipService(DataContext context, IMapper mapper) :
         try
         {
             var subscriptions = await (from fr in context.FollowingRelationShips
-                where fr.UserId == filter.UserId
+                where fr.ApplicationUserId == filter.UserId
                 select new SubscriptionsDto()
                 {
                     Id = fr.FollowingRelationShipId,
@@ -97,7 +95,7 @@ public class FollowingRelationShipService(DataContext context, IMapper mapper) :
                         UserId = fr.FollowingId,
                         UserName = fr.Following.UserName,
                         Fullname =
-                            (fr.Following.UserProfile.FirstName + " " + fr.Following.UserProfile.LastName),
+                            fr.Following.UserProfile.FullName,
                         UserPhoto = fr.Following.UserProfile.Image
                     }
                 }).AsNoTracking().ToListAsync();
@@ -118,10 +116,10 @@ public class FollowingRelationShipService(DataContext context, IMapper mapper) :
             var user = await context.Users.FindAsync(userId);
             var followingUser = await context.Users.FindAsync(followingUserId);
             if (user == null || followingUser == null)
-                return new Response<bool>(HttpStatusCode.BadRequest, "User not found");
+                return new Response<bool>(HttpStatusCode.BadRequest, "ApplicationUser not found");
             var following = new FollowingRelationShip()
             {
-                UserId = userId,
+                ApplicationUserId = userId,
                 FollowingId = followingUserId,
                 DateFollowed = DateTime.UtcNow
             };

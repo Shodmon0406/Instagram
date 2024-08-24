@@ -2,7 +2,6 @@
 using AutoMapper;
 using Domain.Dtos.StoryDtos;
 using Domain.Dtos.ViewerDtos;
-using Domain.Entities;
 using Domain.Entities.Post;
 using Domain.Responses;
 using Infrastructure.Data;
@@ -12,46 +11,51 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Services.StoryServices;
 
-public class StoryService(IFileService fileService, IMapper mapper, DataContext context,
-        IWebHostEnvironment hostEnvironment)
+public class StoryService(
+    IFileService fileService,
+    IMapper mapper,
+    DataContext context,
+    IWebHostEnvironment hostEnvironment)
     : IStoryService
 
 {
-    public async Task<Response<List<GetStoryDto>>> GetStories(string? userId, string userTokenId)
+    public async Task<Response<List<GetStoriesDto>>> GetStories(string? userId, string userTokenId)
     {
         try
         {
-            var stories = context.Stories.AsQueryable();
+            var userProfile = context.UserProfiles.AsNoTracking().AsQueryable();
             if (!string.IsNullOrEmpty(userId))
-            {
-                stories = stories.Where(u => u.UserId == userId);
-            }
-
-            var story = await (from st in stories
-                join pf in context.UserProfiles on st.UserId equals pf.UserId
-                select new GetStoryDto()
+                userProfile = userProfile.Where(x => x.ApplicationUserId == userId);
+            var stories = await (from pf in userProfile
+                select new GetStoriesDto()
                 {
-                    Id = st.Id,
-                    FileName = st.FileName,
-                    CreateAt = st.CreateAt,
-                    UserId = st.UserId,
-                    UserAvatar = pf.Image,
-                    PostId = st.PostId,
-                    ViewerDto = st.UserId == userTokenId
-                        ? new ViewerDto()
+                    UserId = pf.ApplicationUserId,
+                    UserName = pf.ApplicationUser.UserName,
+                    Fullname = pf.FullName,
+                    UserPhoto = pf.Image,
+                    Stories = (from st in context.Stories
+                        where st.ApplicationUserId == pf.ApplicationUserId
+                        select new GetStoryDto()
                         {
-                            Name = pf.FirstName,
-                            UserName = pf.User.UserName,
-                            ViewCount = st.StoryStat.ViewCount,
-                            ViewLike = st.StoryStat.ViewLike
-                        }
-                        : null
-                }).AsNoTracking().ToListAsync();
-            return new Response<List<GetStoryDto>>(story);
+                            Id = st.Id,
+                            FileName = st.FileName,
+                            CreateAt = st.CreateAt,
+                            UserId = st.ApplicationUserId,
+                            PostId = st.PostId,
+                            ViewerDto = st.ApplicationUserId == userTokenId
+                                ? new ViewerDto()
+                                {
+                                    ViewCount = st.StoryStat.ViewCount,
+                                    ViewLike = st.StoryStat.ViewLike
+                                }
+                                : null
+                        }).AsNoTracking().ToList()
+                }).Where(x => x.Stories.Count != 0).AsNoTracking().ToListAsync();
+            return new Response<List<GetStoriesDto>>(stories);
         }
         catch (Exception e)
         {
-            return new Response<List<GetStoryDto>>(HttpStatusCode.InternalServerError, e.Message);
+            return new Response<List<GetStoriesDto>>(HttpStatusCode.InternalServerError, e.Message);
         }
     }
 
@@ -63,20 +67,18 @@ public class StoryService(IFileService fileService, IMapper mapper, DataContext 
             if (story != null)
             {
                 var story2 = await (from st in context.Stories
-                    join pf in context.UserProfiles on st.UserId equals pf.UserId
+                    join pf in context.UserProfiles on st.ApplicationUserId equals pf.ApplicationUserId
                     where st.Id == id
                     select new GetStoryDto()
                     {
                         Id = st.Id,
                         FileName = st.FileName,
                         CreateAt = st.CreateAt,
-                        UserId = st.UserId,
+                        UserId = st.ApplicationUserId,
                         PostId = st.PostId,
-                        ViewerDto = story.UserId == userId
+                        ViewerDto = story.ApplicationUserId == userId
                             ? new ViewerDto()
                             {
-                                Name = pf.FirstName,
-                                UserName = userName,
                                 ViewCount = st.StoryStat.ViewCount,
                                 ViewLike = st.StoryStat.ViewLike
                             }
@@ -95,36 +97,32 @@ public class StoryService(IFileService fileService, IMapper mapper, DataContext 
         }
     }
 
-    public async Task<Response<GetStoryDto>> AddStory(AddStoryDto file, string userId)
+    public async Task<Response<GetStoryDto>> AddStory(AddStoryDto storyDto, string userId)
     {
         try
         {
             var file1 = new Story()
             {
-                UserId = userId,
-                PostId = file.PostId,
+                ApplicationUserId = userId,
+                PostId = storyDto.PostId,
             };
             if (file1.PostId == null)
             {
-                var fileName = fileService.CreateFile(file.Image).Data;
+                var fileName = fileService.CreateFile(storyDto.Image).Data;
                 file1.FileName = fileName;
             }
             else
             {
-                var post = (from p in context.Posts
-                    join image in context.Images on p.PostId equals image.PostId
-                    select new
-                    {
-                        Image = image.ImageName
-                    }).ToList();
-                if (post != null)
+                var image = await context.Images.Where(x => x.PostId == storyDto.PostId)
+                    .Select(x => x.ImageName)
+                    .FirstOrDefaultAsync();
+                if (image != null)
                 {
-                    var img = post[0];
-                    file1.FileName = img.Image;
+                    file1.FileName = image;
                 }
                 else
                 {
-                    new Response<GetStoryDto>(HttpStatusCode.BadRequest, "Post not found");
+                    return new Response<GetStoryDto>(HttpStatusCode.BadRequest, "Post not found");
                 }
             }
 
@@ -146,22 +144,22 @@ public class StoryService(IFileService fileService, IMapper mapper, DataContext 
         }
     }
 
-    public async Task<Response<string>> StoryLike(int StoryId, string userId)
+    public async Task<Response<string>> StoryLike(int storyId, string userId)
     {
         try
         {
-            var story = await context.Stories.FindAsync(StoryId);
+            var story = await context.Stories.FindAsync(storyId);
             if (story == null) return new Response<string>(HttpStatusCode.BadRequest, "Story not found");
             var user = await context.StoryLikes.FirstOrDefaultAsync(e =>
-                e.UserId == userId && e.StoryId == StoryId);
+                e.ApplicationUserId == userId && e.StoryId == storyId);
             var stat = await context.StoryStats.FirstAsync(s => s.StoryId == story.Id);
             if (user == null)
             {
                 stat.ViewLike++;
                 var storyLike = new StoryLike()
                 {
-                    StoryId = StoryId,
-                    UserId = userId,
+                    StoryId = storyId,
+                    ApplicationUserId = userId,
                 };
                 await context.StoryLikes.AddAsync(storyLike);
                 await context.SaveChangesAsync();
@@ -186,16 +184,13 @@ public class StoryService(IFileService fileService, IMapper mapper, DataContext 
         try
         {
             var story = context.Stories.FirstOrDefault(e => e.Id == id);
-            if (story != null)
-            {
-                var path = Path.Combine(hostEnvironment.WebRootPath, "images", story.FileName);
-                File.Delete(path);
-                context.Stories.Remove(story);
-                await context.SaveChangesAsync();
-                return new Response<bool>(true);
-            }
+            if (story == null) return new Response<bool>(false);
+            var path = Path.Combine(hostEnvironment.WebRootPath, "images", story.FileName);
+            File.Delete(path);
+            context.Stories.Remove(story);
+            await context.SaveChangesAsync();
+            return new Response<bool>(true);
 
-            return new Response<bool>(false);
         }
         catch (Exception e)
         {

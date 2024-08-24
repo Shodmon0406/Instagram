@@ -5,14 +5,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Domain.Entities.Post;
 
-[Index("UserId", "PostLikeId", IsUnique = true)]
+[Index("ApplicationUserId", "PostLikeId", IsUnique = true)]
 public class PostUserLike
 {
     [Key]
     public int Id { get; set; }
 
-    public string UserId { get; set; } = null!;
-    public User.User User { get; set; } = null!;
+    [MaxLength(50)]
+    public string ApplicationUserId { get; set; } = null!;
+    public ApplicationUser ApplicationUser { get; set; } = null!;
     public int PostLikeId { get; set; }
     public PostLike PostLike { get; set; } = null!;
 }

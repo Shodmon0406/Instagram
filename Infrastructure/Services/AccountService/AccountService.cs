@@ -2,7 +2,6 @@
 using System.Net;
 using System.Security.Claims;
 using System.Text;
-using Domain.Dtos;
 using Domain.Dtos.EmailDto;
 using Domain.Dtos.LoginDto;
 using Domain.Dtos.MessagesDto;
@@ -20,7 +19,7 @@ using MimeKit.Text;
 namespace Infrastructure.Services.AccountService;
 
 public class AccountService(IConfiguration configuration,
-        UserManager<IdentityUser> userManager, DataContext dbContext, IEmailService emailService)
+        UserManager<ApplicationUser> userManager, DataContext dbContext, IEmailService emailService)
     : IAccountService
 {
     public async Task<Response<string>> Register(RegisterDto model)
@@ -29,23 +28,19 @@ public class AccountService(IConfiguration configuration,
         {
             var result = await userManager.FindByNameAsync(model.UserName);
             if (result != null) return new Response<string>(HttpStatusCode.BadRequest, "Such a user already exists!");
-            var user = new User()
+            var user = new ApplicationUser()
             {
                 UserName = model.UserName.ToLower(),
                 Email = model.Email,
                 UserType = UserType.Personal,
-                DateRegistred = DateTime.UtcNow
+                DateRegistered = DateTime.UtcNow
             };
-            var fullName = model.FullName.Split(' ');
             var profile = new UserProfile()
             {
-                UserId = user.Id,
-                FirstName = fullName[0],
-                LastName = fullName[1] != string.Empty ? fullName[1] : string.Empty,
-                Occupation = string.Empty,
+                ApplicationUserId = user.Id,
+                FullName = model.FullName,
                 DateUpdated = DateTime.UtcNow,
-                LocationId = 1,
-                Dob = DateTime.UtcNow,
+                Dob = new DateTimeOffset(),
                 Image = string.Empty,
                 About = string.Empty,
                 Gender = Gender.Male,
@@ -83,7 +78,7 @@ public class AccountService(IConfiguration configuration,
         }
     }
 
-    private async Task<string> GenerateJwtToken(IdentityUser user)
+    private async Task<string> GenerateJwtToken(ApplicationUser user)
     {
         var userProfile = await dbContext.UserProfiles.FindAsync(user.Id);
         var key = Encoding.UTF8.GetBytes(configuration["Jwt:Key"]!);
@@ -141,12 +136,12 @@ public class AccountService(IConfiguration configuration,
     {
         try
         {
-            var existing = await userManager.FindByEmailAsync(forgotPasswordDto.Email!);
+            var existing = await userManager.FindByEmailAsync(forgotPasswordDto.Email);
             if (existing == null) return new Response<string>(HttpStatusCode.BadRequest, "email  not found");
             var token = await userManager.GeneratePasswordResetTokenAsync(existing);
             var url = $"http://localhost:3000/account/reset-password?token={token}&email={forgotPasswordDto.Email}";
             emailService.SendEmail(
-                new MessagesDto(new[] { forgotPasswordDto.Email }!, "Reset password",
+                new MessagesDto(new[] { forgotPasswordDto.Email }, "Reset password",
                     $"<h1><a href=\"{url}\">Reset password</a></h1>"), TextFormat.Html);
 
             return new Response<string>(HttpStatusCode.OK, "reset password has been sent");

@@ -17,7 +17,7 @@ public class StoryViewController : BaseController
     [HttpPost("add-story-view")]
     public Task<Response<GetStoryViewDto>> AddStoryView(AddStoryViewDto model)
     {
-        var token = User.Claims.FirstOrDefault(e => e.Type == "sid")!.Value;
+        var token = ApplicationUser.Claims.FirstOrDefault(e => e.Type == "sid")!.Value;
         return _storyViewService.AddStoryView(model, token);
     } 
 }*/

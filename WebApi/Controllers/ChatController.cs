@@ -43,7 +43,7 @@ public class ChatController(IChatService service) : BaseController
         return StatusCode(response.StatusCode, response);
     }
 
-    [HttpPut("send-message")]
+    [HttpPost("send-message")]
     public async Task<IActionResult> SendMessage([FromBody]MessageDto message)
     {
         if (ModelState.IsValid)

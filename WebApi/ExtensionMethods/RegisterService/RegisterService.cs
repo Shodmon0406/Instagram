@@ -1,16 +1,16 @@
-﻿using Infrastructure.Data;
+﻿using Domain.Entities.User;
+using Infrastructure.Data;
 using Infrastructure.Seed;
 using Infrastructure.Services;
 using Infrastructure.Services.AccountService;
 using Infrastructure.Services.ChatService;
-using Infrastructure.Services.ExternalAccountService;
+using Infrastructure.Services.Email;
 using Infrastructure.Services.FileService;
 using Infrastructure.Services.FollowingRelationShipService;
-using Infrastructure.Services.LocationDto;
-using Infrastructure.Services.LocationService;
+using Infrastructure.Services.NotificationService;
 using Infrastructure.Services.PostCommentService;
-using Infrastructure.Services.PostFavoriteService;
 using Infrastructure.Services.PostService;
+using Infrastructure.Services.SearchService;
 using Infrastructure.Services.StatisticFollowAndPostService;
 using Infrastructure.Services.StoryServices;
 using Infrastructure.Services.StoryViewServices;
@@ -29,12 +29,9 @@ public static class RegisterService
         services.AddDbContext<DataContext>(configure =>
             configure.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
         services.AddScoped<IUserService, UserService>();
-        services.AddScoped<IExternalAccountService, ExternalAccountService>();
         services.AddScoped<IFollowingRelationShipService, FollowingRelationShipService>();
-        services.AddScoped<ILocationService, LocationService>();
         services.AddScoped<IPostCommentService, PostCommentService>();
         services.AddScoped<IPostService, PostService>();
-        services.AddScoped<IPostFavoriteService, PostFavoriteService>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IUserProfileService, UserProfileService>();
         services.AddScoped<IUserSettingService, UserSettingService>();
@@ -46,9 +43,11 @@ public static class RegisterService
         services.AddScoped<IChatService, ChatService>();
         services.AddScoped<IEmailService,EmailService>();
         services.AddScoped<IStoryViewService, StoryViewService>();
+        services.AddScoped<IUserSearchHistoryService, UserSearchHistoryService>();
+        services.AddScoped<INotificationService, NotificationService>();
         
         
-        services.AddIdentity<IdentityUser, IdentityRole>(config =>
+        services.AddIdentity<ApplicationUser, IdentityRole>(config =>
             {
                 config.Password.RequiredLength = 4;
                 config.Password.RequireDigit = false; // must have at least one digit
@@ -56,7 +55,7 @@ public static class RegisterService
                 config.Password.RequireUppercase = false; // must have at least one uppercase character
                 config.Password.RequireLowercase = false;  // must have at least one lowercase character
             })
-            //for registering usermanager and signinmanger
+            //for registering userManager and signinManager
             .AddEntityFrameworkStores<DataContext>()
             .AddDefaultTokenProviders();
     }

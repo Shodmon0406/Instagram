@@ -79,7 +79,7 @@ public class UserSettingService(DataContext context, IMapper mapper) : IUserSett
         try
         {
             var userSetting = await context.UserSettings.FindAsync(id);
-            if (userSetting == null) return new Response<bool>(HttpStatusCode.BadRequest, "User setting not found");
+            if (userSetting == null) return new Response<bool>(HttpStatusCode.BadRequest, "ApplicationUser setting not found");
             context.UserSettings.Remove(userSetting);
             await context.SaveChangesAsync();
             return new Response<bool>(true);

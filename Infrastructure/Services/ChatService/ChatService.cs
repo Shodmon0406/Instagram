@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using Domain.Dtos.ChatDto;
 using Domain.Dtos.MessageDto;
+using Domain.Dtos.UserDto;
 using Domain.Entities;
 using Domain.Responses;
 using Infrastructure.Data;
@@ -18,8 +19,13 @@ public class ChatService(DataContext context) : IChatService
                 .Select(c => new GetChatDto()
                 {
                     ChatId = c.ChatId,
-                    SendUserId = c.SendUserId,
-                    ReceiveUserId = c.ReceiveUserId
+                    ReceiveUser = new GetUserShortInfoDto()
+                    {
+                        UserId = c.ReceiveUserId == userId ? c.SendUserId : c.ReceiveUserId,
+                        UserName = c.ReceiveUserId == userId ? c.SendUser.UserName! : c.ReceiveUser.UserName!,
+                        Fullname = c.ReceiveUserId == userId ? c.SendUser.UserProfile.FullName! : c.ReceiveUser.UserProfile.FullName!,
+                        UserPhoto = c.ReceiveUserId == userId ? c.SendUser.UserProfile.Image! : c.ReceiveUser.UserProfile.Image!,
+                    }
                 }).ToListAsync();
             return new Response<List<GetChatDto>>(chats);
         }
@@ -42,7 +48,8 @@ public class ChatService(DataContext context) : IChatService
                 {
                     MessageId = m.MessageId,
                     ChatId = m.ChatId,
-                    UserId = m.UserId,
+                    UserId = m.ApplicationUserId,
+                    UserPhoto = c.SendUserId == m.ApplicationUserId ? c.SendUser.UserProfile.Image : c.ReceiveUser.UserProfile.Image,
                     MessageText = m.MessageText,
                     SendMassageDate = m.SendMassageDate
                 }).OrderByDescending(x => x.SendMassageDate).ToListAsync();
@@ -92,7 +99,7 @@ public class ChatService(DataContext context) : IChatService
             var newMessage = new Message()
             {
                 ChatId = message.ChatId,
-                UserId = userId,
+                ApplicationUserId = userId,
                 MessageText = message.MessageText,
                 SendMassageDate = DateTime.UtcNow
             };

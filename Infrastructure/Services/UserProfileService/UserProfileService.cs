@@ -1,13 +1,17 @@
 ﻿using System.Net;
 using Domain.Dtos.UserProfileDto;
+using Domain.Entities.User;
 using Domain.Responses;
 using Infrastructure.Data;
 using Infrastructure.Services.FileService;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Services.UserProfileService;
 
-public class UserProfileService(DataContext context, IFileService fileService)
+public class UserProfileService(DataContext context,
+        UserManager<ApplicationUser> userManager,
+        IFileService fileService)
     : IUserProfileService
 {
     public async Task<Response<GetUserProfileDto>> GetUserProfileById(string id)
@@ -15,30 +19,29 @@ public class UserProfileService(DataContext context, IFileService fileService)
         try
         {
             var userProfile = await (from p in context.UserProfiles
-                where p.UserId == id
+                where p.ApplicationUserId == id
                 select new GetUserProfileDto()
                 {
-                    UserName = p.User.UserName!,
+                    UserName = p.ApplicationUser.UserName!,
                     Gender = p.Gender.ToString()!,
-                    Occupation = p.Occupation,
-                    FirstName = p.FirstName,
-                    LastName = p.LastName,
+                    FullName = p.FullName,
                     DateUpdated = p.DateUpdated,
-                    LocationId = p.LocationId,
                     Dob = p.Dob,
                     About = p.About,
                     Image = p.Image!,
-                    PostCount = p.User.Posts.Count,
+                    PostCount = p.ApplicationUser.Posts.Count,
                     SubscribersCount = context.FollowingRelationShips.Count(x => x.FollowingId == id),
-                    SubscriptionsCount = p.User.FollowingRelationShips.Count // context.FollowingRelationShips.Count(x => x.UserId == id)
+                    SubscriptionsCount =
+                        p.ApplicationUser.FollowingRelationShips
+                            .Count // context.FollowingRelationShips.Count(x => x.UserId == id)
                 }).AsNoTracking().FirstOrDefaultAsync();
-            
+
             if (userProfile != null)
             {
-                
                 return new Response<GetUserProfileDto>(userProfile);
             }
-            return new Response<GetUserProfileDto>(HttpStatusCode.NotFound, "User not found");
+
+            return new Response<GetUserProfileDto>(HttpStatusCode.NotFound, "ApplicationUser not found");
         }
         catch (Exception e)
         {
@@ -46,94 +49,65 @@ public class UserProfileService(DataContext context, IFileService fileService)
         }
     }
 
-
-    #region UpdateUserProfile
-
-    public async Task<Response<GetUserProfileDto>> UpdateUserProfile(UpdateUserProfileDto addUserProfile, string userId)
+    public async Task<Response<string>> UpdateUserProfile(UpdateUserProfileDto updateUserProfile, string userId)
     {
         try
         {
-            var existing = await context.UserProfiles.FirstOrDefaultAsync(x => x.UserId == userId);
-            
-
-            if (existing != null)
-            {
-                if (addUserProfile.FirstName != null) existing.FirstName = addUserProfile.FirstName;
-                existing.FirstName = existing.FirstName;
-                if (addUserProfile.LastName != null) existing.LastName = addUserProfile.LastName;
-                existing.LastName = existing.LastName;
-                if (addUserProfile.About != null) existing.About = addUserProfile.About;
-                existing.About = existing.About;
-                if (addUserProfile.Occupation != null) existing.Occupation = addUserProfile.Occupation;
-                existing.Occupation = existing.Occupation;
-                var loc = await context.Locations.FirstOrDefaultAsync(x => x.LocationId == addUserProfile.LocationId);
-                if (loc == null)
-                {
-                    return new Response<GetUserProfileDto>(HttpStatusCode.NotFound, "not found this location");
-                }
-                else
-                {
-                    existing.LocationId = addUserProfile.LocationId;
-                }
-
-                if (addUserProfile.Gender != null) existing.Gender = addUserProfile.Gender;
-                existing.Gender = existing.Gender;
-
-
-                if (addUserProfile.Dob != null)
-                {
-                    existing.Dob = addUserProfile.Dob;
-                }
-
-                existing.Dob = addUserProfile.Dob;
-                
-                existing.DateUpdated = DateTime.UtcNow;
-                
-                if (existing.Image != null)
-                {
-                    if (addUserProfile != null && existing.Image != null)
-                    {
-                        fileService.DeleteFile(existing.Image);
-                        existing.Image = fileService.CreateFile(addUserProfile.Image).Data;
-                        await context.SaveChangesAsync();
-                    }
-                    else if (addUserProfile.Image == null)
-                    {
-                        existing.Image = existing.Image;
-                        await context.SaveChangesAsync();
-                    }
-                }
-                else if (existing.Image == null && addUserProfile.Image != null)
-                {
-                    existing.Image = fileService.CreateFile(addUserProfile.Image).Data;
-                    await context.SaveChangesAsync();
-                }
-
-
-                await context.SaveChangesAsync();
-                var mapped = new GetUserProfileDto()
-                {
-                    About = existing.About,
-                    Image = existing.Image,
-                    Occupation = existing.Occupation,
-                    FirstName = existing.FirstName,
-                    LastName = existing.LastName,
-                    DateUpdated = existing.DateUpdated,
-                    LocationId = existing.LocationId,
-                    Dob = existing.Dob,
-                    Gender = (string)existing.Gender.ToString()
-                };
-
-                return new Response<GetUserProfileDto>(mapped);
-            }
-
-            return new Response<GetUserProfileDto>(HttpStatusCode.BadRequest, "not found");
+            var user = await userManager.FindByIdAsync(userId);
+            var existing = await context.UserProfiles.FindAsync(userId);
+            existing!.FullName = updateUserProfile.FullName;
+            existing.Gender = updateUserProfile.Gender;
+            existing.About = updateUserProfile.About;
+            user!.PhoneNumber = updateUserProfile.PhoneNumber;
+            user.Email = updateUserProfile.Email;
+            existing.Dob = new DateTimeOffset();
+            var dob = updateUserProfile.Dob.Split('/');
+            existing.Dob = existing.Dob.AddYears(int.Parse(dob[0]) - 1);
+            existing.Dob = existing.Dob.AddMonths(int.Parse(dob[1]) - 1);
+            existing.Dob = existing.Dob.AddDays(int.Parse(dob[2]) - 1);
+            existing.DateUpdated = DateTime.UtcNow;
+            await userManager.UpdateAsync(user);
+            await context.SaveChangesAsync();
+            return new Response<string>("Successfully");
         }
         catch (Exception e)
         {
-            return new Response<GetUserProfileDto>(HttpStatusCode.InternalServerError, e.Message);
+            return new Response<string>(HttpStatusCode.InternalServerError, e.Message);
         }
     }
 
-    #endregion
+    public async Task<Response<string>> UpdateProfilePhoto(ProfilePhotoDto photo, string userId)
+    {
+        try
+        {
+            var user = await context.UserProfiles.FindAsync(userId);
+            if (user == null) return new Response<string>(HttpStatusCode.NotFound, "ApplicationUser not found!");
+            fileService.DeleteFile(user.Image!);
+            var newPhoto = fileService.CreateFile(photo.Photo);
+            user.Image = newPhoto.Data;
+            await context.SaveChangesAsync();
+            return new Response<string>("Successfully");
+        }
+        catch (Exception e)
+        {
+            return new Response<string>(HttpStatusCode.InternalServerError, e.Message);
+        }
+    }
+
+    public async Task<Response<string>> DeleteProfilePhoto(string userId)
+    {
+        try
+        {
+            var userPhoto = await context.UserProfiles.FindAsync(userId);
+            var image = userPhoto!.Image;
+            if (image != null) fileService.DeleteFile(image);
+            userPhoto.Image = string.Empty;
+            await context.SaveChangesAsync();
+            return new Response<string>("Successfully");
+        }
+        catch (Exception e)
+        {
+            return new Response<string>(HttpStatusCode.InternalServerError, e.Message);
+        }
+    }
 }

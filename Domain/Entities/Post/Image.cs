@@ -5,10 +5,8 @@ namespace Domain.Entities.Post;
 
 public class Image
 {
-    [Key]
-    public int ImageId { get; set; }
+    [Key] public int ImageId { get; set; }
     public int PostId { get; set; }
-    public Post Post { get; set; }
-    [MaxLength(250)]
-    public string ImageName { get; set; }
+    public Post Post { get; set; } = null!;
+    [MaxLength(60)] public string ImageName { get; set; } = null!;
 }

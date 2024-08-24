@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using WebApi.ExtensionMethods.AuthConfiguration;
 using WebApi.ExtensionMethods.RegisterService;
 using WebApi.ExtensionMethods.SwaggerConfiguration;
+using WebApi.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,6 +32,10 @@ builder.Services.SwaggerService();
 builder.Services.AddAuthConfigureService(builder.Configuration);
 
 
+// SignalR
+builder.Services.AddSignalR();
+
+
 // automapper
 builder.Services.AddAutoMapper(typeof(MapperProfile));
 
@@ -40,10 +45,11 @@ var app = builder.Build();
 
 app.UseCors(
     corsPolicyBuilder => corsPolicyBuilder.WithOrigins("http://127.0.0.1:5500", "http://localhost:3000","https://localhost:3000", 
-            "https://clever-raindrop-966a86.netlify.app", "https://my-website-first.vercel.app")
+            "https://clever-raindrop-966a86.netlify.app", "https://my-website-first.vercel.app", "http://127.0.0.1:3000")
         .SetIsOriginAllowed(_ => true)
         .AllowAnyHeader()
         .AllowAnyMethod()
+        .AllowCredentials()
 );
 
 // update database
@@ -56,7 +62,6 @@ try
     //seed data
     var seeder = serviceProvider.GetRequiredService<Seeder>();
     await seeder.SeedRole();
-    await seeder.SeedLocation();
     await seeder.SeedUser();
 }
 catch (Exception)
@@ -72,6 +77,8 @@ if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.MapHub<ChatHub>("/chat");
 
 app.UseHttpsRedirection();
 
